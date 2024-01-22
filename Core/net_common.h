@@ -1,9 +1,13 @@
 #pragma once
+
+#include <algorithm>
 #include <chrono>
+#include <cstdint>
 #include <deque>
 #include <iostream>
 #include <memory>
 #include <mutex>
+#include <optional>
 #include <thread>
 #include <vector>
 

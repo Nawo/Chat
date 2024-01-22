@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.21)
-project(ChatUI LANGUAGES CXX)
+project(client LANGUAGES CXX)
+
+set (CMAKE_CXX_STANDARD 17)
 
 file(GLOB CLASSES *.cpp)
 set(SOURCES ${CLASSES})

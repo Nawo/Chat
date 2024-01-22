@@ -1,5 +1,5 @@
 #pragma once
-#include "net_common.h"
+#include "../Core/net_common.h"
 
 static std::vector<char> buffer(1024 * 20);
 
