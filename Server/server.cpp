@@ -2,7 +2,6 @@
 
 #include <iostream>
 
-
 enum class CustomMsgTypes : uint32_t
 {
 	ServerAccept,
@@ -55,12 +54,15 @@ protected:
 
 		case CustomMsgTypes::MessageAll:
 		{
-			std::cout << "[" << client->GetID() << "]: Message All\n";
+			std::cout << "[" << client->GetID() << "]: ";
+			for(const auto &a : msg.body)
+			{
+				std::cout << a;
+			}
+			std::cout << std::endl;
 
 			// Construct a new message and send it to all clients
-			chat::net::message<CustomMsgTypes> msg;
-			msg.header.id = CustomMsgTypes::ServerMessage;
-			msg << client->GetID();
+
 			MessageAllClients(msg, client);
 		}
 		break;

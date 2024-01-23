@@ -1,5 +1,7 @@
 #include "../Core/net_chat.h"
 
+#include <atomic>
+#include <future>
 #include <iostream>
 
 enum class CustomMsgTypes : uint32_t
@@ -27,44 +29,44 @@ public:
 		Send(msg);
 	}
 
-	void MessageAll()
+	void MessageAll(std::string message)
 	{
 		chat::net::message<CustomMsgTypes> msg;
 		msg.header.id = CustomMsgTypes::MessageAll;
+		for(auto &a : message)
+		{
+			msg << a;
+		}
 		Send(msg);
 	}
 };
+
+std::atomic<bool> stopReading(false);
+std::string input;
+
+void asyncReadChar()
+{
+	while(!stopReading)
+	{
+		std::cin >> input;
+	}
+}
 
 int main()
 {
 	CustomClient c;
 	c.Connect("127.0.0.1", 60000);
 
-	bool key[3] = {false, false, false};
-	bool old_key[3] = {false, false, false};
+	auto future = std::async(std::launch::async, asyncReadChar);
 
 	bool bQuit = false;
 	while(!bQuit)
 	{
-		if(GetForegroundWindow() == GetConsoleWindow())
+		if(!input.empty())
 		{
-			key[0] = GetAsyncKeyState('1') & 0x8000;
-			key[1] = GetAsyncKeyState('2') & 0x8000;
-			key[2] = GetAsyncKeyState('3') & 0x8000;
+			c.MessageAll(input);
+			input.clear();
 		}
-
-		if(key[0] && !old_key[0])
-		{
-			c.PingServer();
-			std::cout << "work";
-		}
-		if(key[1] && !old_key[1])
-			c.MessageAll();
-		if(key[2] && !old_key[2])
-			bQuit = true;
-
-		for(int i = 0; i < 3; i++)
-			old_key[i] = key[i];
 
 		if(c.IsConnected())
 		{
@@ -104,15 +106,33 @@ int main()
 					std::cout << "Hello from [" << clientID << "]\n";
 				}
 				break;
+
+				case CustomMsgTypes::MessageAll:
+				{
+					// uint32_t clientID;
+					// msg >> clientID;
+					// std::cout << "[" << clientID << "]: ";
+					for(auto &a : msg.body)
+					{
+						std::cout << a;
+					}
+					std::cout << std::endl;
+				}
+				break;
 				}
 			}
 		}
+
 		else
 		{
 			std::cout << "Server Down\n";
 			bQuit = true;
 		}
 	}
+
+	stopReading = true;
+
+	future.get();
 
 	return 0;
 }
