@@ -17,7 +17,6 @@ namespace chat::connection
 	struct Message
 	{
 		Message(const MessageType messageType, const std::string &senderName,
-				const std::optional<std::string>,
 				const std::string &receiverName, const std::string &body)
 			: messageType_(messageType), senderName_(senderName),
 			  receiverName_(receiverName), body_(body)

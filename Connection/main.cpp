@@ -1,22 +1,17 @@
 
 #include "ResponseDecoder.hpp"
 
-namespace chat::connection
+int main()
 {
+	std::string test("1|Dominik|Roman|siema");
 
-	int main()
-	{
-		std::string test("1|Dominik|Roman|siema");
+	auto decode = chat::connection::ResponseDecoder::makeCollable();
 
-		auto decode = ResponseDecoder::makeCollable();
+	auto message = decode(test);
 
-		auto message = decode(test);
+	std::cout << message->senderName_ << '\n';
+	std::cout << message->receiverName_ << '\n';
+	std::cout << message->body_ << '\n';
 
-		std::cout << message->senderName_ << '\n';
-		std::cout << message->receiverName_ << '\n';
-		std::cout << message->body_ << '\n';
-
-        return 0;
-	}
-
-} // namespace chat::connection
+	return 0;
+}

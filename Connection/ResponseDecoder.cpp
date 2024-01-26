@@ -14,18 +14,16 @@ namespace chat::connection
 		std::getline(iss, body, '|');
 
 		return std::make_shared<Message>(
-				std::stoi(type), sender,
-				(receiver.empty() ? std::nullopt
-								  : std::optional<std::string>(receiver),
-				 (body.empty() ? std::nullopt
-							   : std::optional<std::string>(body))));
+				static_cast<MessageType>(std::stoi(type)), sender, receiver,
+				body);
 	}
 
 	ResponseDecoder::CallResponseDecoder ResponseDecoder::makeCollable()
 	{
-		return [&](const std::string &response){
+		return [&](const std::string &response)
+		{
 			auto decoder = ResponseDecoder();
-			decoder.decodeResponse(response);
+			return decoder.decodeResponse(response);
 		};
 	}
 

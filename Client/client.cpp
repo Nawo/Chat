@@ -6,8 +6,6 @@
 #include <mutex>
 #include <thread>
 
-std::string userName;
-
 enum class CustomMsgTypes : uint32_t
 {
 	ServerAccept,
