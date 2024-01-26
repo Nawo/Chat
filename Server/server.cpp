@@ -54,12 +54,9 @@ protected:
 
 		case CustomMsgTypes::MessageAll:
 		{
-			std::cout << "[" << client->GetID() << "]: ";
-			for(const auto &a : msg.body)
-			{
-				std::cout << a;
-			}
-			std::cout << std::endl;
+			std::cout << "[" << msg.header.senderName << "]: ";
+			std::string str(msg.body.begin(), msg.body.end());
+			std::cout << str << std::endl;
 
 			// Construct a new message and send it to all clients
 
