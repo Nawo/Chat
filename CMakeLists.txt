@@ -3,6 +3,7 @@ project(Chat LANGUAGES CXX)
 
 add_subdirectory(Client)
 add_subdirectory(Server)
+add_subdirectory(Connection)
 add_subdirectory(sample)
 
 # cmake -B build -DCMAKE_BUILD_TYPE=Release

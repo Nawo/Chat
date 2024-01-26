@@ -3,6 +3,8 @@
 #include <atomic>
 #include <future>
 #include <iostream>
+#include <mutex>
+#include <thread>
 
 enum class CustomMsgTypes : uint32_t
 {
@@ -51,6 +53,79 @@ void asyncReadChar()
 		std::cin >> input;
 	}
 }
+class Client
+{
+public:
+	Client() : socket_(io_context_)
+	{
+	}
+	void connect(const std::string &host, const std::string &port)
+	{
+		asio::ip::tcp::resolver resolver(io_context_);
+		asio::connect(socket_, resolver.resolve(host, port));
+		readData();
+	}
+	void readData()
+	{
+		asio::async_read_until(
+				socket_, asio::dynamic_buffer(data_), '\n',
+				[this](std::error_code errorCode, std::size_t length)
+				{
+					if(!errorCode)
+					{
+						std::cout << "[Client] Data received: " << length
+								  << " bytes." << std::endl;
+						std::string message(data_.substr(0, length));
+						std::cout << "[Client] Message received: " << message
+								  << std::endl;
+						data_.erase(0, length); // Clear the processed data
+						readData(); // Initiate another read operation
+					}
+					else
+					{
+						std::cerr << "[Client] Read failed: "
+								  << errorCode.message() << std::endl;
+					}
+				});
+	}
+	void sendData(const std::string &data)
+	{
+		std::cout << "Sending: " << data << std::endl;
+		asio::write(socket_, asio::buffer(data + "\n"));
+	}
+
+	void login(const std::string &username)
+	{
+		sendData("ESTABLISH|" + username + "||");
+	}
+
+	void sendMessage(const std::string &sender, const std::string &recipient,
+					 const std::string &message)
+	{
+		sendData("MESSAGE|" + sender + "|" + recipient + "|" + message);
+	}
+
+	void logout()
+	{
+		sendData("RELINQUISH|||");
+	}
+
+	void run()
+	{
+		std::lock_guard<std::mutex> lockGuard(mtx_);
+		while(socket_.is_open())
+		{
+			io_context_.restart();
+			io_context_.run();
+		}
+	}
+
+private:
+	asio::io_context io_context_;
+	asio::ip::tcp::socket socket_;
+	std::string data_;
+	std::mutex mtx_;
+};
 
 int main()
 {
@@ -133,6 +208,26 @@ int main()
 	stopReading = true;
 
 	future.get();
+	// Client c;
+	// c.connect("127.0.0.1", "8080");
+	// std::thread ioThread([&] { c.run(); });
+	// std::string username;
+	// std::cout << "Enter your username: ";
+	// std::cin >> username;
+	// c.login(username);
+	// std::string recipient, message;
+	// std::cout << std::endl;
+	// std::cout << "Enter recipient (or 'exit' to logout): ";
+	// std::cin >> recipient;
+
+	// while(true)
+	// {
+	// 	std::cout << "Enter your message: ";
+	// 	std::cin.ignore();
+	// 	std::getline(std::cin, message);
+	// 	c.sendMessage(username, recipient, message);
+	// }
+	// ioThread.join();
 
 	return 0;
 }
