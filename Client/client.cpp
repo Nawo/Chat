@@ -6,6 +6,8 @@
 #include <mutex>
 #include <thread>
 
+std::string userName;
+
 enum class CustomMsgTypes : uint32_t
 {
 	ServerAccept,
@@ -35,10 +37,8 @@ public:
 	{
 		chat::net::message<CustomMsgTypes> msg;
 		msg.header.id = CustomMsgTypes::MessageAll;
-		for(auto &a : message)
-		{
-			msg << a;
-		}
+		msg.header.senderName = userName;
+		msg << message;
 		Send(msg);
 	}
 };
@@ -129,6 +129,9 @@ private:
 
 int main()
 {
+	std::cout << "Podaj nick: ";
+	std::cin >> userName;
+
 	CustomClient c;
 	c.Connect("127.0.0.1", 60000);
 
@@ -184,14 +187,9 @@ int main()
 
 				case CustomMsgTypes::MessageAll:
 				{
-					// uint32_t clientID;
-					// msg >> clientID;
-					// std::cout << "[" << clientID << "]: ";
-					for(auto &a : msg.body)
-					{
-						std::cout << a;
-					}
-					std::cout << std::endl;
+					std::cout << "[" << msg.header.senderName << "]: ";
+					std::string str(msg.body.begin(), msg.body.end());
+					std::cout << str << std::endl;
 				}
 				break;
 				}
