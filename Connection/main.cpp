@@ -1,11 +1,11 @@
 
-#include "ResponseDecoder.hpp"
+#include "handlers/ResponseDecoder.hpp"
 
 int main()
 {
 	std::string test("1|Dominik|Roman|siema");
 
-	auto decode = chat::connection::ResponseDecoder::makeCollable();
+	auto decode = chat::connection::handlers::ResponseDecoder::makeCollable();
 
 	auto message = decode(test);
 
