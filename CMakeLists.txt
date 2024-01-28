@@ -5,6 +5,9 @@ add_subdirectory(Client)
 add_subdirectory(Server)
 add_subdirectory(Connection)
 add_subdirectory(sample)
+add_subdirectory(NewCore/Client)
+add_subdirectory(NewCore/Server)
+
 
 # cmake -B build -DCMAKE_BUILD_TYPE=Release
 # cmake --build . --config Release

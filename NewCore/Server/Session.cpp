@@ -28,16 +28,25 @@ void Session::receive()
 													+ m_username + ", "
 													+ m_socket.remote_endpoint()
 															  .address()
-															  .to_string();
+															  .to_string()
+										 << std::endl;
 							 }
 							 if(m_data.type == "logout")
 							 {
 								 // erase from map
 							 }
-							 if(m_data.reciever == "ALL")
+							 if(m_data.type == "MessageAll")
 							 {
+								 std::cout << "[" + m_data.sender
+													  + "]: " + m_data.message
+										   << std::endl;
 								 for(auto &a : m_activeSessions)
-									 a.second->send(m_data);
+								 {
+									 if(a.first != m_data.sender)
+									 {
+										 a.second->send(m_data);
+									 }
+								 }
 							 }
 
 							 m_data.clear();
@@ -56,12 +65,6 @@ void Session::send(const Message &data)
 				{
 					std::cerr << "Error sending to " << data.reciever << ": "
 							  << errorCode.message() << std::endl;
-				}
-				else
-				{
-					std::cout << "Sent " << length << " bytes to "
-							  << data.reciever << ": " << data.message
-							  << std::endl;
 				}
 			});
 }

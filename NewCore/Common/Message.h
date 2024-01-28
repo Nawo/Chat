@@ -8,6 +8,7 @@ struct Message
 		sender.clear();
 		reciever.clear();
 		message.clear();
+		type.clear();
 	}
 
 	uint8_t ID;
