@@ -1,8 +1,9 @@
 #pragma once
 
-#include "Session.h"
+#include "../Interface/IServer.hpp"
+#include "Session.hpp"
 
-class Server
+class Server : public IServer
 {
 public:
 	Server();
