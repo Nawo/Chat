@@ -6,8 +6,9 @@ class Client
 {
 public:
 	Client();
+	~Client();
 	void connect(const std::string &host, const std::string &port);
-	void sendMessage(const Message &msg);
+	void sendMessage(const Message msg);
 	void readMessages();
 
 	void run();

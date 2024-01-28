@@ -2,8 +2,13 @@
 
 Server::Server()
 	: m_acceptator(m_context,
-				   asio::ip::tcp::endpoint(asio::ip::tcp::v4(), 8080))
+				   asio::ip::tcp::endpoint(asio::ip::tcp::v4(), 9000))
 {
+}
+
+Server::~Server()
+{
+	stop();
 }
 
 void Server::acceptConnection()
@@ -23,7 +28,7 @@ void Server::acceptConnection()
 
 void Server::start()
 {
-	std::cout << "Server started on port 8080" << std::endl;
+	std::cout << "Server started on port 9000" << std::endl;
 	acceptConnection();
 	m_context.run();
 }
@@ -32,4 +37,10 @@ void Server::stop()
 {
 	m_context.stop();
 	std::cout << "Server stopped" << std::endl;
+}
+
+int main()
+{
+	std::shared_ptr<Server> server = std::make_shared<Server>();
+	server->start();
 }
