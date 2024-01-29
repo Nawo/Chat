@@ -8,11 +8,10 @@
 
 struct MessageContext
 {
-	MessageContext(const std::string &messageType,
-				   const std::string &senderName,
+	MessageContext(const std::string &messageType, const std::string &senderName,
 				   const std::string &receiverName, const std::string &body)
-		: messageType_(static_cast<MessageType>(std::stoi(messageType))),
-		  senderName_(senderName), receiverName_(receiverName), body_(body)
+		: messageType_(static_cast<MessageType>(std::stoi(messageType))), senderName_(senderName),
+		  receiverName_(receiverName), body_(body)
 	{
 	}
 

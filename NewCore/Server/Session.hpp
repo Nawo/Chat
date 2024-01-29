@@ -7,8 +7,7 @@
 class Session : public ISession, public std::enable_shared_from_this<Session>
 {
 public:
-	explicit Session(asio::ip::tcp::socket socket,
-					 std::map<std::string, std::shared_ptr<Session>> &sessions);
+	explicit Session(asio::ip::tcp::socket socket, std::map<std::string, std::shared_ptr<Session>> &sessions);
 	void start() override;
 
 private:
@@ -16,7 +15,6 @@ private:
 	void response() override;
 
 private:
-	std::string m_username;
 	asio::ip::tcp::socket m_socket;
 	std::string data_;
 	std::string username_;

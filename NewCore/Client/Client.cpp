@@ -6,91 +6,92 @@ Client::Client() : m_socket(m_context)
 
 Client::~Client()
 {
+	disconnect();
 }
 
-void Client::connect(const std::string &host, const std::string &port)
+bool Client::connect(const std::string &host, const std::string &port)
 {
 	asio::ip::tcp::resolver resolver(m_context);
 	asio::connect(m_socket, resolver.resolve(host, port));
+
+	if(!m_socket.is_open())
+		return false;
+
 	readResponse();
+	run();
+
+	return true;
 }
 
 void Client::readResponse()
 {
-	asio::async_read_until(
-			m_socket, asio::dynamic_buffer(data_), '\n',
-			[this](std::error_code errorCode, std::size_t length)
-			{
-				if(!errorCode)
-				{
-					try
-					{
-						auto decode = ResponseDecoder::makeCollable()(data_);
-						std::cout << "[" + decode->getSenderName()
-											 + "]: " + decode->getBody()
-								  << std::endl;
-					}
-					catch(std::exception &e)
-					{
-						std::cout << e.what() << std::endl;
-					}
-					data_.erase(0, length); // Clear the processed data
-					readResponse();			// Initiate another read operation
-				}
-				else
-				{
-					std::cerr << "[Client] Read failed: " << errorCode.message()
-							  << std::endl;
-				}
-			});
+	asio::async_read_until(m_socket, asio::dynamic_buffer(data_), '\n',
+						   [this](std::error_code errorCode, std::size_t length)
+						   {
+							   if(!errorCode)
+							   {
+								   auto decode = ResponseDecoder::makeCollable()(data_);
+								   std::cout << "[" + decode->getSenderName() + "]: " + decode->getBody();
+								   data_.erase(0, length); // Clear the processed data
+								   readResponse();		   // Initiate another read operation
+							   }
+							   else
+							   {
+								   std::cerr << "[ERROR] Read failed: " << errorCode.message() << std::endl;
+							   }
+						   });
 }
 
-void Client::login(const std::string &userName)
+bool Client::login(const std::string &userName)
 {
+	// TODO - handle case when user cannot login to the server
 	auto decode = ResponseDecoder::makeCollable();
 
-	std::string test(std::to_string(static_cast<int>(MessageType::Establish))
-					 + "|" + userName + "||");
+	std::string msg(std::to_string(static_cast<int>(MessageType::Establish)) + "|" + userName + "||");
 
-	sendRequest(decode(test));
+	sendRequest(decode(msg));
+
+	return true;
 }
 
-void Client::sendMessage(const std::string &sender,
-						 const std::string &recipient,
-						 const std::string &message)
+void Client::disconnect()
 {
+	m_context.stop();
+
+	if(thrContext.joinable())
+		thrContext.join();
+}
+
+bool Client::sendMessage(const std::string &sender, const std::string &recipient, const std::string &message)
+{
+	// TODO - handle case when user sent wrong message
+
 	auto decode = ResponseDecoder::makeCollable();
 
-	std::string test(std::to_string(static_cast<int>(MessageType::Message))
-					 + "|" + sender + "|" + recipient + "|" + message);
+	std::string test(std::to_string(static_cast<int>(MessageType::Message)) + "|" + sender + "|" + recipient + "|"
+					 + message);
 
 	sendRequest(decode(test));
+
+	return true;
 }
 
 void Client::sendRequest(MessagePtr msg)
 {
-	std::string request(std::to_string(static_cast<int>(msg->getMessageType()))
-						+ "|" + msg->getSenderName() + "|"
+	std::string request(std::to_string(static_cast<int>(msg->getMessageType())) + "|" + msg->getSenderName() + "|"
 						+ msg->getReceiverName() + "|" + msg->getBody());
 	asio::write(m_socket, asio::buffer(request + "\n"));
 }
 
 void Client::run()
 {
-	std::lock_guard<std::mutex> lockGuard(m_mutex);
-	while(m_socket.is_open())
-	{
-		m_context.restart();
-		m_context.run();
-	}
+	thrContext = std::thread([this]() { m_context.run(); });
 }
 
 int main()
 {
 	std::shared_ptr<Client> client = std::make_shared<Client>();
 	client->connect("127.0.0.1", "9000");
-	std::thread ioThread(
-			[&] { client->run(); }); // Run io_context in a separate thread
 
 	std::string username;
 	std::cout << "Enter your username: ";
@@ -98,11 +99,13 @@ int main()
 
 	client->login(username);
 
-	std::string receiver;
 	std::string mess;
-	std::cout << std::endl;
-	std::cout << "Enter recipient (or 'exit' to logout): ";
-	std::cin >> receiver;
+	std::string receiver = "all";
+	// std::cout << std::endl;
+	// std::cout << "Enter recipient (use "
+	// 			 "all"
+	// 			 " to broadcast): ";
+	// std::cin >> receiver;
 
 	while(true)
 	{
@@ -110,8 +113,6 @@ int main()
 		std::getline(std::cin, mess);
 		client->sendMessage(username, receiver, mess);
 	}
-
-	ioThread.join();
 
 	return 0;
 }

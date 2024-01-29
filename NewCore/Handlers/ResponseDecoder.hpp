@@ -35,7 +35,7 @@ private:
 		std::getline(iss, type, '|');
 		std::getline(iss, sender, '|');
 		std::getline(iss, receiver, '|');
-		std::getline(iss, body, '|');
+		std::getline(iss, body, '\\');
 
 		return std::make_shared<MessageContext>(type, sender, receiver, body);
 	}

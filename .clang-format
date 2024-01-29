@@ -18,7 +18,7 @@ BreakBeforeBinaryOperators: NonAssignment
 BreakBeforeBraces: Allman
 BreakBeforeTernaryOperators: 'true'
 BreakStringLiterals: 'true'
-ColumnLimit: '80'
+ColumnLimit: '120'
 ContinuationIndentWidth: '8'
 DerivePointerAlignment: 'false'
 IncludeBlocks: Regroup

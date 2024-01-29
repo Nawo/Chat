@@ -1,8 +1,6 @@
 #include "Server.hpp"
 
-Server::Server()
-	: m_acceptator(m_context,
-				   asio::ip::tcp::endpoint(asio::ip::tcp::v4(), 9000))
+Server::Server() : m_acceptator(m_context, asio::ip::tcp::endpoint(asio::ip::tcp::v4(), 9000))
 {
 }
 
@@ -18,8 +16,7 @@ void Server::acceptConnection()
 			{
 				if(!errorCode)
 				{
-					auto session = std::make_shared<Session>(std::move(socket),
-															 m_activeSessions);
+					auto session = std::make_shared<Session>(std::move(socket), m_activeSessions);
 					session->start();
 				}
 				acceptConnection();
