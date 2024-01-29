@@ -25,44 +25,48 @@ void Session::response()
 
 					auto decodedMessage = ResponseDecoder::makeCollable()(line);
 
+					username_ = decodedMessage->getSenderName();
 					if(decodedMessage->getMessageType()
 					   == MessageType::Establish)
 					{
-						std::cout << "successfully established session with "
-											 + decodedMessage->getSenderName()
-								  << std::endl;
-						username_ = decodedMessage->getSenderName();
 						m_activeSessions[username_] = self;
+						std::cout << "=====[Log]=====\n";
+						std::cout << username_ + " join the chat \n";
+						std::cout << "IP: "
+											 + m_socket.remote_endpoint()
+													   .address()
+													   .to_string()
+											 + "\n";
+						std::cout << "===============\n";
 					}
 					else if(decodedMessage->getMessageType()
 							== MessageType::Relinquish)
 					{
-						std::cout << "successfully closed session with "
-											 + decodedMessage->getSenderName()
-								  << std::endl;
+						std::cout << "=====[Log]=====\n";
+						std::cout << username_ + " left the chat."
+											 + decodedMessage->getSenderName();
+						std::cout << "===============\n";
+
 						m_activeSessions.erase(username_);
 					}
 					else if(decodedMessage->getMessageType()
 							== MessageType::Message)
 					{
-						std::cout << "Current active sessions: ";
-						for(const auto &pair : m_activeSessions)
-						{
-							std::cout << pair.first << " ";
-						}
-						std::cout << std::endl;
-
 						auto recipientSession = m_activeSessions.find(
 								decodedMessage->getReceiverName());
 						if(recipientSession != m_activeSessions.end())
 						{
-							std::cout
-									<< "got message from "
-											   + decodedMessage->getSenderName()
-											   + ", forwarding message to "
-											   + decodedMessage
-														 ->getReceiverName()
-									<< std::endl;
+							std::cout << "=====[Log]=====\n";
+							std::cout << username_ + " sent message to "
+												 + decodedMessage
+														   ->getReceiverName()
+												 + "\n";
+							std::cout << "Bytes: " + std::to_string(length)
+												 + "\n";
+							std::cout << "Message: " + decodedMessage->getBody()
+												 + "\n";
+							std::cout << "===============\n";
+
 							std::string forwardMessage =
 									std::to_string(static_cast<int>(
 											decodedMessage->getMessageType()))
@@ -72,14 +76,18 @@ void Session::response()
 							recipientSession->second->request(forwardMessage);
 						}
 						else
-							std::cout
-									<< "got message from "
-											   + decodedMessage->getSenderName()
-											   + ", but recipient: "
-											   + decodedMessage
-														 ->getReceiverName()
-											   + " is offline"
-									<< std::endl;
+						{
+							std::cout << "=====[Log]=====\n";
+							std::cout << username_ + " sent message to "
+												 + decodedMessage
+														   ->getReceiverName()
+												 + " [OFFLINE]" + "\n";
+							std::cout << "Bytes: " + std::to_string(length)
+												 + "\n";
+							std::cout << "Message: " + decodedMessage->getBody()
+												 + "\n";
+							std::cout << "===============\n";
+						}
 					}
 					else
 						std::cout << "received unknown protocol message, start "
@@ -97,9 +105,6 @@ void Session::response()
 
 void Session::request(const std::string &request)
 {
-	std::cout << "About to send to " << username_ << ": " << request
-			  << std::endl;
-
 	auto self(shared_from_this());
 	asio::async_write(
 			m_socket, asio::buffer(request + "\n"),
@@ -109,11 +114,6 @@ void Session::request(const std::string &request)
 				{
 					std::cerr << "Error sending to " << username_ << ": "
 							  << errorCode.message() << std::endl;
-				}
-				else
-				{
-					std::cout << "Sent " << length << " bytes to " << username_
-							  << ": " << request << std::endl;
 				}
 			});
 }
