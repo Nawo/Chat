@@ -1,7 +1,5 @@
 #include "Session.hpp"
 
-#include "../Handlers/ResponseDecoder.cpp"
-
 Session::Session(asio::ip::tcp::socket socket,
 				 std::map<std::string, std::shared_ptr<Session>> &sessions)
 	: m_socket(std::move(socket)), m_activeSessions(sessions)
@@ -25,26 +23,26 @@ void Session::response()
 					std::string line(data_.substr(0, length - 1));
 					data_.erase(0, length);
 
-					auto decode = ResponseDecoder::makeCollable();
-					auto messageContext = decode(line);
+					auto decodedMessage = ResponseDecoder::makeCollable()(line);
 
-					if(messageContext->messageType_ == MessageType::Establish)
+					if(decodedMessage->getMessageType()
+					   == MessageType::Establish)
 					{
 						std::cout << "successfully established session with "
-											 + messageContext->senderName_
+											 + decodedMessage->getSenderName()
 								  << std::endl;
-						username_ = messageContext->senderName_;
+						username_ = decodedMessage->getSenderName();
 						m_activeSessions[username_] = self;
 					}
-					else if(messageContext->messageType_
+					else if(decodedMessage->getMessageType()
 							== MessageType::Relinquish)
 					{
 						std::cout << "successfully closed session with "
-											 + messageContext->senderName_
+											 + decodedMessage->getSenderName()
 								  << std::endl;
 						m_activeSessions.erase(username_);
 					}
-					else if(messageContext->messageType_
+					else if(decodedMessage->getMessageType()
 							== MessageType::Message)
 					{
 						std::cout << "Current active sessions: ";
@@ -55,27 +53,33 @@ void Session::response()
 						std::cout << std::endl;
 
 						auto recipientSession = m_activeSessions.find(
-								messageContext->receiverName_);
+								decodedMessage->getReceiverName());
 						if(recipientSession != m_activeSessions.end())
 						{
-							std::cout << "got message from "
-												 + messageContext->senderName_
-												 + ", forwarding message to "
-												 + messageContext->receiverName_
-									  << std::endl;
+							std::cout
+									<< "got message from "
+											   + decodedMessage->getSenderName()
+											   + ", forwarding message to "
+											   + decodedMessage
+														 ->getReceiverName()
+									<< std::endl;
 							std::string forwardMessage =
-									"Message|" + messageContext->senderName_
-									+ "|" + messageContext->receiverName_ + "|"
-									+ messageContext->body_;
+									std::to_string(static_cast<int>(
+											decodedMessage->getMessageType()))
+									+ "|" + decodedMessage->getSenderName()
+									+ "|" + decodedMessage->getReceiverName()
+									+ "|" + decodedMessage->getBody();
 							recipientSession->second->request(forwardMessage);
 						}
 						else
-							std::cout << "got message from "
-												 + messageContext->senderName_
-												 + ", but recipient: "
-												 + messageContext->receiverName_
-												 + " is offline"
-									  << std::endl;
+							std::cout
+									<< "got message from "
+											   + decodedMessage->getSenderName()
+											   + ", but recipient: "
+											   + decodedMessage
+														 ->getReceiverName()
+											   + " is offline"
+									<< std::endl;
 					}
 					else
 						std::cout << "received unknown protocol message, start "

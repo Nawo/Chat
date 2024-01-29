@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../Common/Common.h"
 #include "../Interface/IServer.hpp"
 #include "Session.hpp"
 

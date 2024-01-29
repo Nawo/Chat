@@ -1,8 +1,8 @@
+#pragma once
 
-#include "../Common/Common.h"
-#include "../Common/MessageContext.hpp"
-
-#include <memory>
+// forward declaration
+struct MessageContext;
+using MessagePtr = std::shared_ptr<MessageContext>;
 
 class IClient
 {

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "../Common/Common.h"
-#include "../Common/MessageContext.hpp"
 #include "../Handlers/ResponseDecoder.hpp"
 #include "../Interface/ISession.hpp"
 
@@ -19,7 +18,6 @@ private:
 private:
 	std::string m_username;
 	asio::ip::tcp::socket m_socket;
-	Message m_data;
 	std::string data_;
 	std::string username_;
 	std::map<std::string, std::shared_ptr<Session>> &m_activeSessions;

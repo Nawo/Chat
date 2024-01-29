@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../Common/Common.h"
-#include "../Common/MessageContext.hpp"
+#include "../Handlers/ResponseDecoder.hpp"
 #include "../Interface/IClient.hpp"
 
 class Client : public IClient
@@ -11,7 +11,7 @@ public:
 	~Client();
 	void connect(const std::string &host, const std::string &port) override;
 
-	void login(const std::string &userName);
+	void login(const std::string &userName) override;
 	void sendMessage(const std::string &sender, const std::string &recipient,
 					 const std::string &message) override;
 

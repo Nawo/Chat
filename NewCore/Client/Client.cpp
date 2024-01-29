@@ -1,7 +1,5 @@
 #include "Client.hpp"
 
-#include "../Handlers/ResponseDecoder.cpp"
-
 Client::Client() : m_socket(m_context)
 {
 }
@@ -25,11 +23,17 @@ void Client::readResponse()
 			{
 				if(!errorCode)
 				{
-					std::cout << "[Client] Data received: " << length
-							  << " bytes." << std::endl;
-					std::string message(data_.substr(0, length));
-					std::cout << "[Client] Message received: " << message
-							  << std::endl;
+					try
+					{
+						auto decode = ResponseDecoder::makeCollable()(data_);
+						std::cout << "[" + decode->getSenderName()
+											 + "]: " + decode->getBody()
+								  << std::endl;
+					}
+					catch(std::exception &e)
+					{
+						std::cout << e.what() << std::endl;
+					}
 					data_.erase(0, length); // Clear the processed data
 					readResponse();			// Initiate another read operation
 				}
@@ -45,7 +49,8 @@ void Client::login(const std::string &userName)
 {
 	auto decode = ResponseDecoder::makeCollable();
 
-	std::string test("1|" + userName + "||");
+	std::string test(std::to_string(static_cast<int>(MessageType::Establish))
+					 + "|" + userName + "||");
 
 	sendRequest(decode(test));
 }
@@ -56,17 +61,17 @@ void Client::sendMessage(const std::string &sender,
 {
 	auto decode = ResponseDecoder::makeCollable();
 
-	std::string test("3|" + sender + "|" + recipient + "|" + message);
+	std::string test(std::to_string(static_cast<int>(MessageType::Message))
+					 + "|" + sender + "|" + recipient + "|" + message);
 
 	sendRequest(decode(test));
 }
 
 void Client::sendRequest(MessagePtr msg)
 {
-	std::string request(std::to_string(static_cast<int>(msg->messageType_))
-						+ "|" + msg->senderName_ + "|" + msg->receiverName_
-						+ "|" + msg->body_);
-	std::cout << "Sending" << request << "\n";
+	std::string request(std::to_string(static_cast<int>(msg->getMessageType()))
+						+ "|" + msg->getSenderName() + "|"
+						+ msg->getReceiverName() + "|" + msg->getBody());
 	asio::write(m_socket, asio::buffer(request + "\n"));
 }
 
@@ -93,14 +98,14 @@ int main()
 
 	client->login(username);
 
-	std::string receiver, mess;
+	std::string receiver;
+	std::string mess;
 	std::cout << std::endl;
 	std::cout << "Enter recipient (or 'exit' to logout): ";
 	std::cin >> receiver;
 
 	while(true)
 	{
-		std::cout << "Enter your message: ";
 		std::cin.ignore();
 		std::getline(std::cin, mess);
 		client->sendMessage(username, receiver, mess);

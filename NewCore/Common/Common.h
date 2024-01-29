@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Message.h"
-
 #include <algorithm>
 #include <chrono>
 #include <cstdint>
