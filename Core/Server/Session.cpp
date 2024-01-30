@@ -10,7 +10,24 @@ void Session::start()
 	response();
 }
 
-void Session::response()
+namespace
+{
+	// TODO
+	// functions to handle message types, e.g. sendMessageToAll, sendMessageToUser, getUsersList
+	void sendMessageToAll(const std::string &request)
+	{
+	}
+
+	void sendClientSuccessfullLoginMessage(const std::string &request)
+	{
+	}
+
+	void sendClientLogoutMessage(const std::string &request)
+	{
+	}
+} // namespace
+
+void Session::response() // read messages from client
 {
 	auto self(shared_from_this());
 	asio::async_read_until(
@@ -29,25 +46,33 @@ void Session::response()
 					const std::string &body = decodedMessage->getBody();
 					const MessageType &msgType = decodedMessage->getMessageType();
 
-					if(msgType == MessageType::Establish)
+					switch(msgType)
 					{
+					case MessageType::Establish:
 						m_activeSessions[username_] = self;
 
 						std::cout << "=====[Log]=====\n";
 						std::cout << username_ + " join the chat \n";
 						std::cout << "IP: " + m_socket.remote_endpoint().address().to_string() + "\n";
 						std::cout << "===============\n";
-					}
-					else if(msgType == MessageType::Relinquish)
-					{
+
+						request(ResponseCoder::makeCollable()(MessageType::Message, "SERVER", username_,
+															  PredefinedMessages::successClientLogin));
+						break;
+
+					case MessageType::Relinquish:
+
 						m_activeSessions.erase(username_);
 
 						std::cout << "=====[Log]=====\n";
 						std::cout << username_ + " left the chat." + "\n";
 						std::cout << "===============\n";
-					}
-					else if(msgType == MessageType::Message)
-					{
+
+						request(ResponseCoder::makeCollable()(MessageType::Message, "SERVER", username_,
+															  PredefinedMessages::successClientDisconnect));
+						break;
+					case MessageType::Message:
+
 						if(receiverName == "all")
 						{
 							for(const auto &[clientName, clientSocket] : m_activeSessions)
@@ -60,10 +85,8 @@ void Session::response()
 									std::cout << "Message: " + body + "\n";
 									std::cout << "===============\n";
 
-									std::string forwardMessage = std::to_string(static_cast<int>(msgType)) + "|"
-																 + username_ + "|" + clientName + "|" + body;
-
-									clientSocket->request(forwardMessage);
+									clientSocket->request(ResponseCoder::makeCollable()(MessageType::Message, username_,
+																						"all", body));
 								}
 							}
 						}
@@ -78,10 +101,8 @@ void Session::response()
 								std::cout << "Message: " + body + "\n";
 								std::cout << "===============\n";
 
-								std::string forwarddMessage = std::to_string(static_cast<int>(msgType)) + "|"
-															  + username_ + "|" + receiverName + "|" + body;
-
-								recipientSession->second->request(forwarddMessage);
+								recipientSession->second->request(ResponseCoder::makeCollable()(
+										MessageType::Message, username_, receiverName, body));
 							}
 
 							else // user not found in m_activeSessions
@@ -92,12 +113,20 @@ void Session::response()
 								std::cout << "Bytes: " + std::to_string(length) + "\n";
 								std::cout << "Message: " + body + "\n";
 								std::cout << "===============\n";
+
+								std::string errorMsg = receiverName + " is OFFLINE";
+
+								std::string codedMessage = ResponseCoder::makeCollable()(MessageType::Error, "SERVER",
+																						 username_, errorMsg);
+
+								request(codedMessage);
 							}
 						}
-					}
-					else
-					{
+						break;
+
+					default:
 						std::cout << "received unknown protocol message, start retrying... " << std::endl;
+						break;
 					}
 
 					response();
@@ -110,7 +139,7 @@ void Session::response()
 			});
 }
 
-void Session::request(const std::string &request)
+void Session::request(const std::string &request) // Send request to client's socket
 {
 	auto self(shared_from_this());
 	asio::async_write(m_socket, asio::buffer(request + "\n"),
