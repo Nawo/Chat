@@ -45,11 +45,9 @@ void Client::readResponse()
 bool Client::login(const std::string &userName)
 {
 	// TODO - handle case when user cannot login to the server
-	auto decode = ResponseDecoder::makeCollable();
+	std::string codedMessage = ResponseCoder::makeCollable()(MessageType::Establish, userName, "", "");
 
-	std::string msg(std::to_string(static_cast<int>(MessageType::Establish)) + "|" + userName + "||");
-
-	sendRequest(decode(msg));
+	sendRequest(codedMessage);
 
 	return true;
 }
@@ -65,22 +63,16 @@ void Client::disconnect()
 bool Client::sendMessage(const std::string &sender, const std::string &recipient, const std::string &message)
 {
 	// TODO - handle case when user sent wrong message
+	std::string codedMessage = ResponseCoder::makeCollable()(MessageType::Message, sender, recipient, message);
 
-	auto decode = ResponseDecoder::makeCollable();
-
-	std::string test(std::to_string(static_cast<int>(MessageType::Message)) + "|" + sender + "|" + recipient + "|"
-					 + message);
-
-	sendRequest(decode(test));
+	sendRequest(codedMessage);
 
 	return true;
 }
 
-void Client::sendRequest(MessagePtr msg)
+void Client::sendRequest(const std::string &msg)
 {
-	std::string request(std::to_string(static_cast<int>(msg->getMessageType())) + "|" + msg->getSenderName() + "|"
-						+ msg->getReceiverName() + "|" + msg->getBody());
-	asio::write(m_socket, asio::buffer(request + "\n"));
+	asio::write(m_socket, asio::buffer(msg + "\n"));
 }
 
 void Client::run()

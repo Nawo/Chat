@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../Common/Common.h"
+#include "../Handlers/ResponseCoder.hpp"
 #include "../Handlers/ResponseDecoder.hpp"
 #include "../Interface/IClient.hpp"
 
@@ -20,7 +21,7 @@ public:
 	void readResponse() override;
 
 private:
-	void sendRequest(MessagePtr msg);
+	void sendRequest(const std::string &msg);
 
 	std::thread thrContext;
 	asio::io_context m_context;
