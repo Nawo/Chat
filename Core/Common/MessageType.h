@@ -12,4 +12,5 @@ namespace PredefinedMessages
 {
 	static std::string successClientLogin = "Succesfull loged to the server.";
 	static std::string successClientDisconnect = "Succesfull disconnect from the server.";
+	static std::string serverStarted = "Server started.";
 } // namespace PredefinedMessages

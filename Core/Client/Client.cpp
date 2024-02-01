@@ -9,18 +9,54 @@ Client::~Client()
 	disconnect();
 }
 
+void Client::run()
+{
+	thrContext = std::thread([this]() { m_context.run(); });
+}
+
 bool Client::connect(const std::string &host, const std::string &port)
 {
-	asio::ip::tcp::resolver resolver(m_context);
-	asio::connect(m_socket, resolver.resolve(host, port));
+	try
+	{
+		asio::ip::tcp::resolver resolver(m_context);
+		asio::connect(m_socket, resolver.resolve(host, port));
 
-	if(!m_socket.is_open())
+		if(!IsConnected())
+		{
+			return false;
+		}
+
+		run();
+		readResponse();
+	}
+	catch(std::exception &e)
+	{
+		std::cerr << "[ERROR] " << e.what() << "\n";
 		return false;
-
-	readResponse();
-	run();
-
+	}
 	return true;
+}
+
+void Client::disconnect()
+{
+	std::string codedMessage = ResponseCoder::makeCollable()(MessageType::Relinquish, "", "", "");
+
+	sendRequest(codedMessage);
+
+	if(IsConnected())
+	{
+		asio::post(m_context, [this]() { m_socket.close(); });
+	}
+
+	m_context.stop();
+
+	if(thrContext.joinable())
+		thrContext.join();
+}
+
+bool Client::IsConnected() const
+{
+	return m_socket.is_open();
 }
 
 void Client::readResponse()
@@ -52,14 +88,6 @@ bool Client::login(const std::string &userName)
 	return true;
 }
 
-void Client::disconnect()
-{
-	m_context.stop();
-
-	if(thrContext.joinable())
-		thrContext.join();
-}
-
 bool Client::sendMessage(const std::string &sender, const std::string &recipient, const std::string &message)
 {
 	// TODO - handle case when user sent wrong message
@@ -73,11 +101,6 @@ bool Client::sendMessage(const std::string &sender, const std::string &recipient
 void Client::sendRequest(const std::string &msg)
 {
 	asio::write(m_socket, asio::buffer(msg + "\n"));
-}
-
-void Client::run()
-{
-	thrContext = std::thread([this]() { m_context.run(); });
 }
 
 int main()

@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 3.21)
 project(Chat LANGUAGES CXX)
 
-add_subdirectory(sample)
 add_subdirectory(Core/Client)
 add_subdirectory(Core/Server)
 

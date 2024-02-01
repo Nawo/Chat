@@ -16,6 +16,8 @@ public:
 	bool login(const std::string &userName) override;
 	void disconnect() override;
 
+	bool IsConnected() const;
+
 	bool sendMessage(const std::string &sender, const std::string &recipient, const std::string &message) override;
 
 	void readResponse() override;
