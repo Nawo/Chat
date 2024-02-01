@@ -6,15 +6,16 @@ Client::Client() : m_socket(m_context)
 
 Client::~Client()
 {
-	disconnect();
+	Disconnect();
 }
 
-void Client::run()
+const bool Client::Run()
 {
-	thrContext = std::thread([this]() { m_context.run(); });
+	m_thread = std::thread([this]() { m_context.run(); });
+	return true;
 }
 
-bool Client::connect(const std::string &host, const std::string &port)
+const bool Client::Connect(const std::string &host, const std::string &port)
 {
 	try
 	{
@@ -26,8 +27,8 @@ bool Client::connect(const std::string &host, const std::string &port)
 			return false;
 		}
 
-		run();
-		readResponse();
+		Run();
+		Read();
 	}
 	catch(std::exception &e)
 	{
@@ -37,11 +38,11 @@ bool Client::connect(const std::string &host, const std::string &port)
 	return true;
 }
 
-void Client::disconnect()
+const bool Client::Disconnect()
 {
 	std::string codedMessage = ResponseCoder::makeCollable()(MessageType::Relinquish, "", "", "");
 
-	sendRequest(codedMessage);
+	Send(codedMessage);
 
 	if(IsConnected())
 	{
@@ -50,32 +51,37 @@ void Client::disconnect()
 
 	m_context.stop();
 
-	if(thrContext.joinable())
-		thrContext.join();
+	if(m_thread.joinable())
+	{
+		m_thread.join();
+	}
+
+	return true;
 }
 
-bool Client::IsConnected() const
+const bool Client::IsConnected() const
 {
 	return m_socket.is_open();
 }
 
-void Client::readResponse()
+const std::string Client::Read()
 {
-	asio::async_read_until(m_socket, asio::dynamic_buffer(data_), '\n',
+	asio::async_read_until(m_socket, asio::dynamic_buffer(m_data), '\n',
 						   [this](std::error_code errorCode, std::size_t length)
 						   {
 							   if(!errorCode)
 							   {
-								   auto decode = ResponseDecoder::makeCollable()(data_);
+								   auto decode = ResponseDecoder::makeCollable()(m_data);
 								   std::cout << "[" + decode->getSenderName() + "]: " + decode->getBody();
-								   data_.erase(0, length); // Clear the processed data
-								   readResponse();		   // Initiate another read operation
+								   m_data.erase(0, length); // Clear the processed data
+								   Read();					// Initiate another read operation
 							   }
 							   else
 							   {
 								   std::cerr << "[ERROR] Read failed: " << errorCode.message() << std::endl;
 							   }
 						   });
+	return "";
 }
 
 bool Client::login(const std::string &userName)
@@ -83,7 +89,7 @@ bool Client::login(const std::string &userName)
 	// TODO - handle case when user cannot login to the server
 	std::string codedMessage = ResponseCoder::makeCollable()(MessageType::Establish, userName, "", "");
 
-	sendRequest(codedMessage);
+	Send(codedMessage);
 
 	return true;
 }
@@ -93,20 +99,21 @@ bool Client::sendMessage(const std::string &sender, const std::string &recipient
 	// TODO - handle case when user sent wrong message
 	std::string codedMessage = ResponseCoder::makeCollable()(MessageType::Message, sender, recipient, message);
 
-	sendRequest(codedMessage);
+	Send(codedMessage);
 
 	return true;
 }
 
-void Client::sendRequest(const std::string &msg)
+const bool Client::Send(const std::string &msg)
 {
 	asio::write(m_socket, asio::buffer(msg + "\n"));
+	return true;
 }
 
 int main()
 {
 	std::shared_ptr<Client> client = std::make_shared<Client>();
-	client->connect("127.0.0.1", "9000");
+	client->Connect("127.0.0.1", "9000");
 
 	std::string username;
 	std::cout << "Enter your username: ";
