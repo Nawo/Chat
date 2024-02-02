@@ -1,9 +1,9 @@
 #pragma once
 
 #include "../Common/Common.h"
-#include "../Handlers/ResponseCoder.hpp"
-#include "../Handlers/ResponseDecoder.hpp"
-#include "../Interface/ISession.hpp"
+#include "../Handlers/ResponseCoder.h"
+#include "../Handlers/ResponseDecoder.h"
+#include "../Interface/ISession.h"
 
 class Session : public ISession, public std::enable_shared_from_this<Session>
 {

@@ -36,15 +36,7 @@ public:
 	/**
 	 * @returns true, if successfull send message, false if not
 	 *
-	 * @note This function is called to send coded message,
-	 * messsage is coded by this schemat:
-	 *    int     string    string   string
-	 * <msgType>|<sender>|<receiver>|<body>
-	 * types of messages:
-	 * 1 - Establish
-	 * 2 - Relinquish
-	 * 3 - Message
-	 * 4 - Error
+	 * @note This function is called to send coded message
 	 */
 	virtual const bool Send(const DataType &msg) = 0;
 
@@ -52,14 +44,6 @@ public:
 	 * @returns std::string with coded message
 	 *
 	 * @note This function returns coded message
-	 * messsage is coded by this schemat:
-	 *    int     string    string   string
-	 * <msgType>|<sender>|<receiver>|<body>
-	 * types of messages:
-	 * 1 - Establish
-	 * 2 - Relinquish
-	 * 3 - Message
-	 * 4 - Error
 	 */
-	virtual const DataType Read() = 0;
+	virtual void Read() = 0;
 };

@@ -9,4 +9,3 @@ private:
 	virtual void request(const std::string &request) = 0;
 	virtual void response() = 0;
 };
-using SessionPtr = std::shared_ptr<ISession>;

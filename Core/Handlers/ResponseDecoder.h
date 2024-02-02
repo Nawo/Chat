@@ -1,12 +1,8 @@
 #pragma once
 
-#include "../Common/MessageContext.hpp"
+#include "../Common/Common.h"
+#include "../Common/MessageContext.h"
 #include "../Common/MessageType.h"
-
-#include <functional>
-#include <memory>
-#include <sstream>
-#include <string>
 
 class ResponseDecoder
 {

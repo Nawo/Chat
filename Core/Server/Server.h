@@ -1,8 +1,8 @@
 #pragma once
 
 #include "../Common/Common.h"
-#include "../Interface/IServer.hpp"
-#include "Session.hpp"
+#include "../Interface/IServer.h"
+#include "Session.h"
 
 class Server : public IServer
 {

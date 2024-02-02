@@ -1,4 +1,4 @@
-#include "Session.hpp"
+#include "Session.h"
 
 Session::Session(asio::ip::tcp::socket socket, std::map<std::string, std::shared_ptr<Session>> &sessions)
 	: m_socket(std::move(socket)), m_activeSessions(sessions)

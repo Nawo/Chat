@@ -1,15 +1,12 @@
 #pragma once
 
+#include "Common.h"
 #include "MessageType.h"
-
-#include <iostream>
-#include <memory>
-#include <string>
 
 struct MessageContext
 {
-	MessageContext(const std::string &messageType, const std::string &senderName,
-				   const std::string &receiverName, const std::string &body)
+	MessageContext(const std::string &messageType, const std::string &senderName, const std::string &receiverName,
+				   const std::string &body)
 		: messageType_(static_cast<MessageType>(std::stoi(messageType))), senderName_(senderName),
 		  receiverName_(receiverName), body_(body)
 	{

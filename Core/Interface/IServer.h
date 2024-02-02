@@ -9,5 +9,3 @@ public:
 private:
 	virtual void acceptConnection() = 0;
 };
-
-using ServerPtr = std::shared_ptr<IServer>;
