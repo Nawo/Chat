@@ -7,7 +7,7 @@
 class ResponseDecoder
 {
 public:
-	using CallResponseDecoder = std::function<MessagePtr(const std::string &)>;
+	using CallResponseDecoder = std::function<std::shared_ptr<MessageContext>(const std::string &)>;
 
 	static CallResponseDecoder makeCollable()
 	{
@@ -19,8 +19,7 @@ public:
 	}
 
 private:
-	// using MessagePtr = std::shared_ptr<MessageContext>;
-	MessagePtr decodeResponse(const std::string &response)
+	std::shared_ptr<MessageContext> decodeResponse(const std::string &response)
 	{
 		std::istringstream iss(response);
 		std::string type;

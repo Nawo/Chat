@@ -38,5 +38,3 @@ private:
 	const std::string receiverName_;
 	const std::string body_;
 };
-
-using MessagePtr = std::shared_ptr<MessageContext>;

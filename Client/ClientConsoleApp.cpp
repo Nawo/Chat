@@ -1,11 +1,12 @@
 #include "../Core/Client/Client.h"
+#include "../Core/Handlers/ResponseCoder.h"
+#include "../Core/Handlers/ResponseDecoder.h"
 
 class ClientApp : public Client
 {
 public:
 	bool login(const std::string &userName)
 	{
-		// TODO - handle case when user cannot login to the server
 		std::string codedMessage = ResponseCoder::makeCollable()(MessageType::Establish, userName, "", "");
 
 		Send(codedMessage);
@@ -17,7 +18,11 @@ public:
 	{
 		std::string codedMessage = ResponseCoder::makeCollable()(MessageType::Relinquish, "", "", "");
 
+		Disconnect();
+
 		Send(codedMessage);
+
+		return true;
 	}
 
 	bool sendMessage(const std::string &sender, const std::string &recipient, const std::string &message)
@@ -29,12 +34,31 @@ public:
 
 		return true;
 	}
+
+	void readMessage()
+	{
+		while(IsConnected())
+		{
+			m_incomingMessages.wait();
+
+			if(!m_incomingMessages.empty())
+			{
+				std::string data = m_incomingMessages.pop_back();
+
+				auto decodedMessage = ResponseDecoder::makeCollable()(data);
+
+				std::cout << "[" + decodedMessage->getSenderName() + "]: " + decodedMessage->getBody();
+			}
+		}
+	}
 };
 
 int main()
 {
 	std::shared_ptr<ClientApp> client = std::make_shared<ClientApp>();
 	client->Connect("127.0.0.1", "9000");
+
+	std::thread thread = std::thread([&]() { client->readMessage(); });
 
 	std::string username;
 	std::cout << "Enter your username: ";
@@ -44,20 +68,17 @@ int main()
 
 	std::string mess;
 	std::string receiver = "all";
-	// std::cout << std::endl;
-	// std::cout << "Enter recipient (use "
-	// 			 "all"
-	// 			 " to broadcast): ";
-	// std::cin >> receiver;
 
 	while(true)
 	{
 		std::cin.ignore();
 		std::getline(std::cin, mess);
 		client->sendMessage(username, receiver, mess);
+		mess.clear();
 	}
 
 	client->unlogin();
+	thread.join();
 
 	return 0;
 }

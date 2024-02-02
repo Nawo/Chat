@@ -1,8 +1,7 @@
 #pragma once
 
 #include "../Common/Common.h"
-#include "../Handlers/ResponseCoder.h"
-#include "../Handlers/ResponseDecoder.h"
+#include "../Common/TSqueue.h"
 #include "../Interface/IClient.h"
 
 class Client : public IClient<std::string>
@@ -18,7 +17,17 @@ public:
 
 	const bool Run() override
 	{
-		m_thread = std::thread([this]() { m_context.run(); });
+		try
+		{
+			m_thread = std::thread([this]() { m_context.run(); });
+		}
+		catch(std::exception &e)
+		{
+			std::cerr << "[ERROR] " << e.what() << std::endl;
+
+			return false;
+		}
+
 		return true;
 	}
 
@@ -39,9 +48,11 @@ public:
 		}
 		catch(std::exception &e)
 		{
-			std::cerr << "[ERROR] " << e.what() << "\n";
+			std::cerr << "[ERROR] " << e.what() << std::endl;
+
 			return false;
 		}
+
 		return true;
 	}
 
@@ -75,30 +86,24 @@ public:
 
 	void Read() override
 	{
-		asio::async_read_until(m_socket, asio::dynamic_buffer(m_data), '\n',
+		asio::async_read_until(m_socket, asio::dynamic_buffer(m_data), "\n",
 							   [this](std::error_code errorCode, std::size_t length)
 							   {
 								   if(!errorCode)
 								   {
-									   // BE DELETED SOON
-									   auto decode = ResponseDecoder::makeCollable()(m_data);
-									   std::cout << "[" + decode->getSenderName() + "]: " + decode->getBody();
-									   //
-
-									   // m_incomingMessages.push_back(m_data);
+									   m_incomingMessages.push_back(m_data);
 									   m_data.erase(0, length);
 									   Read();
 								   }
 								   else
 								   {
-									   std::cerr << "[ERROR] Read failed: " << errorCode.message() << std::endl;
+									   std::cerr << "[ERROR] " << errorCode.message() << std::endl;
 								   }
 							   });
 	}
 
 protected:
-	// TO DO make thread safe members to handle push, pop etc operations on this container
-	std::deque<std::string> m_incomingMessages;
+	tsqueue<std::string> m_incomingMessages;
 
 private:
 	std::thread m_thread;
