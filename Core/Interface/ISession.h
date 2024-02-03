@@ -3,9 +3,10 @@
 class ISession
 {
 public:
-	virtual void start() = 0;
+	virtual void Start() = 0;
 
 private:
-	virtual void request(const std::string &request) = 0;
-	virtual void response() = 0;
+	virtual void Send(const std::string &msg) = 0;
+
+	virtual void Read() = 0;
 };

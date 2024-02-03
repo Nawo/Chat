@@ -3,9 +3,9 @@
 class IServer
 {
 public:
-	virtual bool start() = 0;
-	virtual void stop() = 0;
+	virtual const bool Start() = 0;
 
-private:
-	virtual void acceptConnection() = 0;
+	virtual void Stop() = 0;
+
+	virtual void AcceptConnections() = 0;
 };
