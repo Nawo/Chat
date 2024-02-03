@@ -27,8 +27,16 @@ public:
 
 	bool sendMessage(const std::string &sender, const std::string &recipient, const std::string &message)
 	{
-		// TODO - handle case when user sent wrong message
 		std::string codedMessage = ResponseCoder::makeCollable()(MessageType::Message, sender, recipient, message);
+
+		Send(codedMessage);
+
+		return true;
+	}
+
+	bool sendMessageToAll(const std::string &sender, const std::string &message)
+	{
+		std::string codedMessage = ResponseCoder::makeCollable()(MessageType::MessageAll, sender, "", message);
 
 		Send(codedMessage);
 
@@ -67,13 +75,12 @@ int main()
 	client->login(username);
 
 	std::string mess;
-	std::string receiver = "all";
 
 	while(true)
 	{
 		std::cin.ignore();
 		std::getline(std::cin, mess);
-		client->sendMessage(username, receiver, mess);
+		client->sendMessageToAll(username, mess);
 		mess.clear();
 	}
 

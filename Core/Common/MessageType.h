@@ -5,7 +5,8 @@ enum class MessageType : uint8_t
 	Establish = 1,
 	Relinquish = 2,
 	Message = 3,
-	Error = 4
+	MessageAll = 4,
+	Error = 5
 };
 
 namespace PredefinedMessages

@@ -49,6 +49,7 @@ void Session::response() // read messages from client
 					switch(msgType)
 					{
 					case MessageType::Establish:
+					{
 						m_activeSessions[username_] = self;
 
 						std::cout << "=====[Log]=====\n";
@@ -59,9 +60,10 @@ void Session::response() // read messages from client
 						request(ResponseCoder::makeCollable()(MessageType::Message, "SERVER", username_,
 															  PredefinedMessages::successClientLogin));
 						break;
+					}
 
 					case MessageType::Relinquish:
-
+					{
 						m_activeSessions.erase(username_);
 
 						std::cout << "=====[Log]=====\n";
@@ -69,64 +71,70 @@ void Session::response() // read messages from client
 						std::cout << "===============\n";
 
 						request(ResponseCoder::makeCollable()(MessageType::Message, "SERVER", username_,
+
 															  PredefinedMessages::successClientDisconnect));
 						break;
+					}
+
 					case MessageType::Message:
-
-						if(receiverName == "all")
+					{
+						auto recipientSession = m_activeSessions.find(receiverName);
+						if(recipientSession != m_activeSessions.end())
 						{
-							for(const auto &[clientName, clientSocket] : m_activeSessions)
-							{
-								if(clientName != username_)
-								{
-									std::cout << "=====[Log]=====\n";
-									std::cout << username_ + " sent message to all\n";
-									std::cout << "Bytes: " + std::to_string(length) + "\n";
-									std::cout << "Message: " + body + "\n";
-									std::cout << "===============\n";
+							std::cout << "=====[Log]=====\n";
+							std::cout << username_ + " sent message to " + receiverName + "\n";
+							std::cout << "Bytes: " + std::to_string(length) + "\n";
+							std::cout << "Message: " + body + "\n";
+							std::cout << "===============\n";
 
-									clientSocket->request(ResponseCoder::makeCollable()(MessageType::Message, username_,
-																						"all", body));
-								}
-							}
+							recipientSession->second->request(
+									ResponseCoder::makeCollable()(MessageType::Message, username_, receiverName, body));
 						}
-						else
+
+						else // user not found in m_activeSessions
 						{
-							auto recipientSession = m_activeSessions.find(receiverName);
-							if(recipientSession != m_activeSessions.end())
+							std::cout << "=====[Log]=====\n";
+							std::cout << username_ + " tried to send message to " + receiverName
+												 + " but it is [OFFLINE]" + "\n";
+							std::cout << "Bytes: " + std::to_string(length) + "\n";
+							std::cout << "Message: " + body + "\n";
+							std::cout << "===============\n";
+
+							std::string errorMsg = receiverName + " is OFFLINE";
+
+							std::string codedMessage =
+									ResponseCoder::makeCollable()(MessageType::Error, "SERVER", username_, errorMsg);
+
+							request(codedMessage);
+						}
+
+						break;
+					}
+
+					case MessageType::MessageAll:
+					{
+						for(const auto &[clientName, clientSocket] : m_activeSessions)
+						{
+							if(clientName != username_)
 							{
 								std::cout << "=====[Log]=====\n";
-								std::cout << username_ + " sent message to " + receiverName + "\n";
+								std::cout << username_ + " sent message to all\n";
 								std::cout << "Bytes: " + std::to_string(length) + "\n";
 								std::cout << "Message: " + body + "\n";
 								std::cout << "===============\n";
 
-								recipientSession->second->request(ResponseCoder::makeCollable()(
-										MessageType::Message, username_, receiverName, body));
-							}
-
-							else // user not found in m_activeSessions
-							{
-								std::cout << "=====[Log]=====\n";
-								std::cout << username_ + " tried to send message to " + receiverName
-													 + " but it is [OFFLINE]" + "\n";
-								std::cout << "Bytes: " + std::to_string(length) + "\n";
-								std::cout << "Message: " + body + "\n";
-								std::cout << "===============\n";
-
-								std::string errorMsg = receiverName + " is OFFLINE";
-
-								std::string codedMessage = ResponseCoder::makeCollable()(MessageType::Error, "SERVER",
-																						 username_, errorMsg);
-
-								request(codedMessage);
+								clientSocket->request(
+										ResponseCoder::makeCollable()(MessageType::Message, username_, "all", body));
 							}
 						}
 						break;
+					}
 
 					default:
+					{
 						std::cout << "received unknown protocol message, start retrying... " << std::endl;
 						break;
+					}
 					}
 
 					response();
@@ -147,7 +155,7 @@ void Session::request(const std::string &request) // Send request to client's so
 					  {
 						  if(errorCode)
 						  {
-							  std::cerr << "[ERROR]" << errorCode.message() << std::endl;
+							  std::cerr << "[ERROR] " << errorCode.message() << std::endl;
 						  }
 					  });
 }
