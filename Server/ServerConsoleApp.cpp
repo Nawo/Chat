@@ -4,6 +4,7 @@ int main()
 {
 	std::shared_ptr<Server> server = std::make_shared<Server>(9000);
 	server->Start();
+	std::cout << "[SERVER] started";
 	while(true)
 	{
 	}

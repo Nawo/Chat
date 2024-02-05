@@ -34,9 +34,9 @@ public:
 		return true;
 	}
 
-	bool sendMessageToAll(const std::string &sender, const std::string &message)
+	bool sendMessageToAll(const std::string &message)
 	{
-		std::string codedMessage = ResponseCoder::makeCollable()(MessageType::MessageAll, sender, "", message);
+		std::string codedMessage = ResponseCoder::makeCollable()(MessageType::MessageAll, "", "", message);
 
 		Send(codedMessage);
 
@@ -80,7 +80,8 @@ int main()
 	{
 		std::cin.ignore();
 		std::getline(std::cin, mess);
-		client->sendMessageToAll(username, mess);
+		client->sendMessageToAll(mess);
+		std::cout << "//" + mess + "//" << std::endl;
 		mess.clear();
 	}
 
