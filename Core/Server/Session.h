@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../Common/Asio.h"
 #include "../Common/Common.h"
 #include "../Common/TSqueue.h"
 #include "../Handlers/ResponseCoder.h"
