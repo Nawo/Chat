@@ -7,7 +7,7 @@
 #include "../Handlers/ResponseDecoder.h"
 #include "../Interface/ISession.h"
 
-class Session : public ISession, public std::enable_shared_from_this<Session>
+class Session : public ISession<std::string>, public std::enable_shared_from_this<Session>
 {
 public:
 	explicit Session(asio::ip::tcp::socket socket, std::map<std::string, std::shared_ptr<Session>> &sessions)
