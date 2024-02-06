@@ -9,4 +9,8 @@ set(SOURCES ${CLASSES})
 add_definitions(-D_WIN32_WINNT=0x0601) #minimum required windows 7
 
 include_directories(../lib/asio-1.28.0/include)
+include_directories(../lib/sqlite3)
+
 add_executable(${PROJECT_NAME} ${SOURCES}) 
+
+target_link_libraries(${PROJECT_NAME} sqlite)

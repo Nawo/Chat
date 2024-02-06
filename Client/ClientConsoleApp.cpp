@@ -1,6 +1,7 @@
 #include "../Core/Client/Client.h"
 #include "../Core/Handlers/ResponseCoder.h"
 #include "../Core/Handlers/ResponseDecoder.h"
+#include "../lib/sqlite3/sqlite3.h"
 
 class ClientApp : public Client
 {
@@ -63,6 +64,23 @@ public:
 
 int main()
 {
+	sqlite3 *db;
+	char *zErrMsg = 0;
+	int rc;
+
+	rc = sqlite3_open("test.db", &db);
+
+	if(rc)
+	{
+		fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(db));
+		return (0);
+	}
+	else
+	{
+		fprintf(stderr, "Opened database successfully\n");
+	}
+	sqlite3_close(db);
+
 	std::shared_ptr<ClientApp> client = std::make_shared<ClientApp>();
 	client->Connect("127.0.0.1", "9000");
 
