@@ -48,16 +48,39 @@ public:
 				{
 					if(!errorCode)
 					{
-						auto session = std::make_shared<Session>(std::move(socket), m_activeSessions);
-						session->Start();
+						std::lock_guard<std::mutex> lg(m_mutex);
+						m_activeSessions.push_back(std::make_shared<Session>(std::move(socket), m_incomingMessages));
+						m_activeSessions.front()->Start();
 					}
 					AcceptConnections();
 				});
 	}
 
+	std::shared_ptr<Session> getSessionByUsername(const std::string &username)
+	{
+		std::lock_guard<std::mutex> lg(m_mutex);
+		auto it = std::find_if(m_activeSessions.begin(), m_activeSessions.end(),
+							   [username](auto it) -> bool { return it->getSessionOwner() == username; });
+		if(it == m_activeSessions.end())
+		{
+			return nullptr;
+		}
+
+		return *it;
+	}
+
+	std::vector<std::shared_ptr<Session>> getActiveSessions() const
+	{
+		return m_activeSessions;
+	}
+
+protected:
+	tsqueue<std::pair<std::string, std::shared_ptr<Session>>> m_incomingMessages;
+	std::vector<std::shared_ptr<Session>> m_activeSessions;
+
 private:
+	std::mutex m_mutex;
 	asio::io_context m_context;
 	std::thread m_thread;
 	asio::ip::tcp::acceptor m_acceptator;
-	std::map<std::string, std::shared_ptr<Session>> m_activeSessions;
 };

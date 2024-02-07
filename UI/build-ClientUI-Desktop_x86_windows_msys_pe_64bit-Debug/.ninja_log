@@ -1,0 +1,9 @@
+# ninja log v5
+7	3508	7289977459867720	ClientUI_autogen/timestamp	5d5f558049c818ce
+7	3508	7289977459867720	ClientUI_autogen/mocs_compilation.cpp	5d5f558049c818ce
+7	3508	7289977459867720	D:/Projekty/Chat/UI/build-ClientUI-Desktop_x86_windows_msys_pe_64bit-Debug/ClientUI_autogen/timestamp	5d5f558049c818ce
+7	3508	7289977459867720	D:/Projekty/Chat/UI/build-ClientUI-Desktop_x86_windows_msys_pe_64bit-Debug/ClientUI_autogen/mocs_compilation.cpp	5d5f558049c818ce
+3513	5796	7289977483922974	CMakeFiles/ClientUI.dir/ClientUI_autogen/mocs_compilation.cpp.obj	fd2f9297b51b08d2
+3509	5806	7289977484065957	CMakeFiles/ClientUI.dir/main.cpp.obj	e578112db705a38f
+3517	5810	7289977484065957	CMakeFiles/ClientUI.dir/mainwindow.cpp.obj	f1864bc63445eba4
+5811	6282	7289977488681690	ClientUI.exe	146e4fdeb5e513df

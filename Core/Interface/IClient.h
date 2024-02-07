@@ -17,7 +17,7 @@ public:
 	 * @note This function have to be called to connect with server,
 	 * as host we give IP (e.g. 123.456.789.1), and port which server listening
 	 */
-	virtual const bool Connect(const std::string &host, const std::string &port) = 0;
+	virtual const bool Connect(const std::string &, const std::string &) = 0;
 
 	/**
 	 * @returns true, if successfull disconnect, false if not
@@ -38,7 +38,7 @@ public:
 	 *
 	 * @note This function is called to send coded message
 	 */
-	virtual const bool Send(const DataType &msg) = 0;
+	virtual const bool Send(const DataType &) = 0;
 
 	/**
 	 * @returns std::string with coded message
