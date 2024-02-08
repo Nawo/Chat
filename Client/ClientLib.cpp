@@ -20,6 +20,15 @@ bool ClientLib::unlogin()
 	return true;
 }
 
+bool ClientLib::printUsers()
+{
+	std::string codedMessage = ResponseCoder::makeCollable()(MessageType::PrintUsers, "", "", "");
+
+	Send(codedMessage);
+
+	return true;
+}
+
 bool ClientLib::sendMessage(const std::string &sender, const std::string &recipient, const std::string &message)
 {
 	std::string codedMessage = ResponseCoder::makeCollable()(MessageType::Message, sender, recipient, message);
@@ -87,12 +96,16 @@ int main()
 	client->login(username);
 
 	std::string mess;
-
+	
 	while(true)
 	{
 		std::cin.ignore();
 		std::getline(std::cin, mess);
-		client->sendMessageToAll(mess);
+		if(mess == "1")
+		{
+			client->printUsers();
+		}
+
 		mess.clear();
 	}
 
