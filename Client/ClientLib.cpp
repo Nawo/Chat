@@ -93,7 +93,6 @@ int main()
 		std::cin.ignore();
 		std::getline(std::cin, mess);
 		client->sendMessageToAll(mess);
-		std::cout << "//" + mess + "//" << std::endl;
 		mess.clear();
 	}
 

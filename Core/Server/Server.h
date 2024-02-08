@@ -49,14 +49,15 @@ public:
 					if(!errorCode)
 					{
 						std::lock_guard<std::mutex> lg(m_mutex);
-						m_activeSessions.push_back(std::make_shared<Session>(std::move(socket), m_incomingMessages));
-						m_activeSessions.front()->Start();
+						m_activeSessions.emplace_back(std::make_shared<Session>(std::move(socket), m_incomingMessages));
+						m_activeSessions.back()->Start();
 					}
 					AcceptConnections();
 				});
 	}
 
-	std::shared_ptr<Session> getSessionByUsername(const std::string &username)
+protected:
+	const std::shared_ptr<Session> &getSessionByUsername(const std::string &username)
 	{
 		std::lock_guard<std::mutex> lg(m_mutex);
 		auto it = std::find_if(m_activeSessions.begin(), m_activeSessions.end(),
@@ -69,16 +70,21 @@ public:
 		return *it;
 	}
 
-	std::vector<std::shared_ptr<Session>> getActiveSessions() const
+	const std::vector<std::shared_ptr<Session>> &getActiveSessions() const
 	{
 		return m_activeSessions;
 	}
 
-protected:
+	const tsqueue<std::pair<std::string, std::shared_ptr<Session>>> &GetIncomingMessages() const
+	{
+		return m_incomingMessages;
+	}
+
 	tsqueue<std::pair<std::string, std::shared_ptr<Session>>> m_incomingMessages;
-	std::vector<std::shared_ptr<Session>> m_activeSessions;
 
 private:
+	std::vector<std::shared_ptr<Session>> m_activeSessions;
+
 	std::mutex m_mutex;
 	asio::io_context m_context;
 	std::thread m_thread;
