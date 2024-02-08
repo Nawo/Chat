@@ -19,4 +19,7 @@ public:
 	void OnClientMessage(std::shared_ptr<MessageContext> &&decodedMessage, std::shared_ptr<Session> &&messageOwner);
 
 	void OnClientMessageAll(std::shared_ptr<MessageContext> &&decodedMessage, std::shared_ptr<Session> &&messageOwner);
+
+	void OnShowAvailableUsers(std::shared_ptr<MessageContext> &&decodedMessage,
+							  std::shared_ptr<Session> &&messageOwner);
 };

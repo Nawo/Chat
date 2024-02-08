@@ -6,7 +6,8 @@ enum class MessageType : uint8_t
 	Relinquish = 2,
 	Message = 3,
 	MessageAll = 4,
-	Error = 5
+	Error = 5,
+	PrintUsers = 6
 };
 
 namespace PredefinedMessages
