@@ -11,6 +11,7 @@ public:
 	bool login(const std::string &userName);
 
 	bool unlogin();
+	bool printUsers();
 
 	bool sendMessage(const std::string &sender, const std::string &recipient, const std::string &message);
 

@@ -33,6 +33,11 @@ void ServerLib::Update()
 
 			OnClientMessageAll(std::move(decodedMessage), std::move(mess.second));
 			break;
+		
+		case MessageType::PrintUsers:
+
+			OnShowAvailableUsers(std::move(decodedMessage), std::move(mess.second));
+			break;
 
 		default:
 
@@ -111,6 +116,23 @@ void ServerLib::OnClientMessageAll(std::shared_ptr<MessageContext> &&decodedMess
 		}
 	}
 }
+
+void ServerLib::OnShowAvailableUsers(std::shared_ptr<MessageContext> &&decodedMessage, std::shared_ptr<Session> &&messageOwner)
+{
+	std::string username = messageOwner->getSessionOwner();
+	std::string activeUsers{"Active users"};
+
+	for(const auto& session : getActiveSessions())
+	{
+		if(session->getSessionOwner() == username) continue;
+
+		activeUsers+= ":" + session->getSessionOwner();
+	}
+
+	if(!activeUsers.empty())
+		messageOwner->Send(ResponseCoder::makeCollable()(MessageType::PrintUsers, username, username, activeUsers));
+}
+
 
 int main()
 {
