@@ -5,13 +5,6 @@ class IClient
 {
 public:
 	/**
-	 * @returns true, if successfull run, false if not
-	 *
-	 * @note This function have to be called to run the client thread
-	 */
-	virtual const bool Run() = 0;
-
-	/**
 	 * @returns true, if successfull connect, false if not
 	 *
 	 * @note This function have to be called to connect with server,
@@ -32,6 +25,14 @@ public:
 	 * @note This function is used to check client connection
 	 */
 	virtual const bool IsConnected() const = 0;
+
+protected:
+	/**
+	 * @returns true, if successfull run, false if not
+	 *
+	 * @note This function have to be called to run the client thread
+	 */
+	virtual const bool Run() = 0;
 
 	/**
 	 * @returns true, if successfull send message, false if not

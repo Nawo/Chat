@@ -40,11 +40,11 @@ bool ClientLib::sendMessageToAll(const std::string &message)
 
 MessageContext ClientLib::readMessage()
 {
-	m_incomingMessages.wait();
+	GetIncomingMessages().wait();
 
-	if(!m_incomingMessages.empty())
+	if(!GetIncomingMessages().empty())
 	{
-		return *ResponseDecoder::makeCollable()(m_incomingMessages.pop_back()).get();
+		return *ResponseDecoder::makeCollable()(GetIncomingMessages().pop_back()).get();
 	}
 }
 

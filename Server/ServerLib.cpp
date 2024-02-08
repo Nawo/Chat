@@ -2,11 +2,11 @@
 
 void ServerLib::Update()
 {
-	m_incomingMessages.wait();
+	GetIncomingMessages().wait();
 
-	if(!m_incomingMessages.empty())
+	if(!GetIncomingMessages().empty())
 	{
-		auto mess = m_incomingMessages.pop_back();
+		auto mess = GetIncomingMessages().pop_back();
 
 		std::shared_ptr<MessageContext> decodedMessage = ResponseDecoder::makeCollable()(mess.first);
 

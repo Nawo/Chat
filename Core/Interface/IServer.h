@@ -7,5 +7,6 @@ public:
 
 	virtual void Stop() = 0;
 
+private:
 	virtual void AcceptConnections() = 0;
 };

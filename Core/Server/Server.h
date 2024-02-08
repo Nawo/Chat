@@ -41,20 +41,6 @@ public:
 			m_thread.join();
 		}
 	}
-	void AcceptConnections() override
-	{
-		m_acceptator.async_accept(
-				[this](std::error_code errorCode, asio::ip::tcp::socket socket)
-				{
-					if(!errorCode)
-					{
-						std::lock_guard<std::mutex> lg(m_mutex);
-						m_activeSessions.emplace_back(std::make_shared<Session>(std::move(socket), m_incomingMessages));
-						m_activeSessions.back()->Start();
-					}
-					AcceptConnections();
-				});
-	}
 
 protected:
 	const std::shared_ptr<Session> &getSessionByUsername(const std::string &username)
@@ -75,16 +61,29 @@ protected:
 		return m_activeSessions;
 	}
 
-	const tsqueue<std::pair<std::string, std::shared_ptr<Session>>> &GetIncomingMessages() const
+	tsqueue<std::pair<std::string, std::shared_ptr<Session>>> &GetIncomingMessages()
 	{
 		return m_incomingMessages;
 	}
 
-	tsqueue<std::pair<std::string, std::shared_ptr<Session>>> m_incomingMessages;
-
 private:
-	std::vector<std::shared_ptr<Session>> m_activeSessions;
+	void AcceptConnections() override
+	{
+		m_acceptator.async_accept(
+				[this](std::error_code errorCode, asio::ip::tcp::socket socket)
+				{
+					if(!errorCode)
+					{
+						std::lock_guard<std::mutex> lg(m_mutex);
+						m_activeSessions.emplace_back(std::make_shared<Session>(std::move(socket), m_incomingMessages));
+						m_activeSessions.back()->Start();
+					}
+					AcceptConnections();
+				});
+	}
 
+	tsqueue<std::pair<std::string, std::shared_ptr<Session>>> m_incomingMessages;
+	std::vector<std::shared_ptr<Session>> m_activeSessions;
 	std::mutex m_mutex;
 	asio::io_context m_context;
 	std::thread m_thread;

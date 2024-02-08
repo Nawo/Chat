@@ -16,22 +16,6 @@ public:
 		Disconnect();
 	}
 
-	const bool Run() override
-	{
-		try
-		{
-			m_thread = std::thread([this]() { m_context.run(); });
-		}
-		catch(std::exception &e)
-		{
-			std::cerr << "[ERROR] " << e.what() << std::endl;
-
-			return false;
-		}
-
-		return true;
-	}
-
 	const bool Connect(const std::string &host, const std::string &port) override
 	{
 		try
@@ -79,6 +63,23 @@ public:
 		return m_socket.is_open();
 	}
 
+protected:
+	const bool Run() override
+	{
+		try
+		{
+			m_thread = std::thread([this]() { m_context.run(); });
+		}
+		catch(std::exception &e)
+		{
+			std::cerr << "[ERROR] " << e.what() << std::endl;
+
+			return false;
+		}
+
+		return true;
+	}
+
 	const bool Send(const std::string &msg) override
 	{
 		asio::write(m_socket, asio::buffer(msg + "\n"));
@@ -103,10 +104,13 @@ public:
 							   });
 	}
 
-protected:
-	tsqueue<std::string> m_incomingMessages;
+	tsqueue<std::string> &GetIncomingMessages()
+	{
+		return m_incomingMessages;
+	}
 
 private:
+	tsqueue<std::string> m_incomingMessages;
 	std::thread m_thread;
 	asio::io_context m_context;
 	asio::ip::tcp::socket m_socket;
