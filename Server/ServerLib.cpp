@@ -132,18 +132,5 @@ void ServerLib::OnShowAvailableUsers(std::shared_ptr<MessageContext> &&decodedMe
 	}
 
 	if(!activeUsers.empty())
-		messageOwner->Send(ResponseCoder::makeCollable()(MessageType::PrintUsers, username, username, activeUsers));
-}
-
-// CODE UNDER WILL BE IN DIFFERENT FILE
-
-int main()
-{
-	std::shared_ptr<ServerLib> server = std::make_shared<ServerLib>(9000);
-	server->Start();
-	std::cout << "[SERVER] started" << std::endl;
-	while(true)
-	{
-		server->Update();
-	}
+		messageOwner->Send(ResponseCoder::makeCollable()(MessageType::PrintUsers, "SERVER", username, activeUsers));
 }

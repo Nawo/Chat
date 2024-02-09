@@ -1,9 +1,13 @@
 #pragma once
 
-#include "../Common/Asio.h"
-#include "../Common/Common.h"
+#define ASIO_STANDALONE
+
 #include "../Common/TSqueue.h"
 #include "../Interface/IClient.h"
+
+#include <asio.hpp>
+#include <asio/ts/buffer.hpp>
+#include <asio/ts/internet.hpp>
 
 class Client : public IClient<std::string>
 {

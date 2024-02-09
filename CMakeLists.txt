@@ -8,7 +8,7 @@ add_subdirectory(Client)
 add_subdirectory(Server)
 add_subdirectory(lib)
 add_subdirectory(Tests)
-#add_subdirectory(UI)
+add_subdirectory(UI)
 
 # cmake -B build -DCMAKE_BUILD_TYPE=Release
 # cmake --build . --config Release

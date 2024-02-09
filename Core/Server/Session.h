@@ -1,11 +1,13 @@
 #pragma once
 
-#include "../Common/Asio.h"
-#include "../Common/Common.h"
+#define ASIO_STANDALONE
+
 #include "../Common/TSqueue.h"
-#include "../Handlers/ResponseCoder.h"
-#include "../Handlers/ResponseDecoder.h"
 #include "../Interface/ISession.h"
+
+#include <asio.hpp>
+#include <asio/ts/buffer.hpp>
+#include <asio/ts/internet.hpp>
 
 class Session : public ISession<std::string>, public std::enable_shared_from_this<Session>
 {

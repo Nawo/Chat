@@ -20,6 +20,8 @@ if(BUILD_TESTING)
     file(GLOB CLASSES *.cpp)
     set(SOURCES ${CLASSES})
 
+    include_directories(../Handlers)
+
     add_executable(${PROJECT_NAME} ${SOURCES}) 
     target_link_libraries(${PROJECT_NAME} PRIVATE GTest::GTest)
 

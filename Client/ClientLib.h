@@ -1,9 +1,12 @@
 #pragma once
 
-#include "../Core/Client/Client.h"
-#include "../Core/Handlers/ResponseCoder.h"
-#include "../Core/Handlers/ResponseDecoder.h"
-#include "../lib/sqlite3/sqlite3.h"
+#include <Client.h>
+#include <Common.h>
+#include <MessageContext.h>
+#include <MessageType.h>
+#include <ResponseCoder.h>
+#include <ResponseDecoder.h>
+#include <sqlite3.h>
 
 class ClientLib : public Client
 {

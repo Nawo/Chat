@@ -1,4 +1,4 @@
-#include "../Core/Handlers/ResponseCoder.h"
+#include "ResponseCoder.h"
 
 #include <gtest/gtest.h>
 

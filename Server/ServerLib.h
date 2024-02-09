@@ -1,9 +1,12 @@
 #pragma once
 
-#include "../Core/Handlers/ResponseCoder.h"
-#include "../Core/Handlers/ResponseDecoder.h"
-#include "../Core/Server/Server.h"
-#include "../lib/sqlite3/sqlite3.h"
+#include <Common.h>
+#include <MessageContext.h>
+#include <MessageType.h>
+#include <ResponseCoder.h>
+#include <ResponseDecoder.h>
+#include <Server.h>
+#include <sqlite3.h>
 
 class ServerLib : public Server
 {
