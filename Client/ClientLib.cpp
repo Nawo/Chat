@@ -53,9 +53,11 @@ MessageContext ClientLib::readMessage()
 
 	if(!GetIncomingMessages().empty())
 	{
-		return *ResponseDecoder::makeCollable()(GetIncomingMessages().pop_back()).get();
+		return *ResponseDecoder::makeCollable()(GetIncomingMessages().pop_front()).get();
 	}
 }
+
+// CODE UNDER WILL BE IN DIFFERENT FILE
 
 int main()
 {
@@ -96,7 +98,7 @@ int main()
 	client->login(username);
 
 	std::string mess;
-	
+
 	while(true)
 	{
 		std::cin.ignore();

@@ -6,9 +6,9 @@ void ServerLib::Update()
 
 	if(!GetIncomingMessages().empty())
 	{
-		auto mess = GetIncomingMessages().pop_back();
+		auto incomingMessage = GetIncomingMessages().pop_front();
 
-		std::shared_ptr<MessageContext> decodedMessage = ResponseDecoder::makeCollable()(mess.first);
+		std::shared_ptr<MessageContext> decodedMessage = ResponseDecoder::makeCollable()(incomingMessage.first);
 
 		const MessageType &msgType = decodedMessage->getMessageType();
 
@@ -16,27 +16,27 @@ void ServerLib::Update()
 		{
 		case MessageType::Establish:
 
-			OnClientLogin(std::move(decodedMessage), std::move(mess.second));
+			OnClientLogin(std::move(decodedMessage), std::move(incomingMessage.second));
 			break;
 
 		case MessageType::Relinquish:
 
-			OnClientUnlogin(std::move(decodedMessage), std::move(mess.second));
+			OnClientUnlogin(std::move(decodedMessage), std::move(incomingMessage.second));
 			break;
 
 		case MessageType::Message:
 
-			OnClientMessage(std::move(decodedMessage), std::move(mess.second));
+			OnClientMessage(std::move(decodedMessage), std::move(incomingMessage.second));
 			break;
 
 		case MessageType::MessageAll:
 
-			OnClientMessageAll(std::move(decodedMessage), std::move(mess.second));
+			OnClientMessageAll(std::move(decodedMessage), std::move(incomingMessage.second));
 			break;
-		
+
 		case MessageType::PrintUsers:
 
-			OnShowAvailableUsers(std::move(decodedMessage), std::move(mess.second));
+			OnShowAvailableUsers(std::move(decodedMessage), std::move(incomingMessage.second));
 			break;
 
 		default:
@@ -117,22 +117,25 @@ void ServerLib::OnClientMessageAll(std::shared_ptr<MessageContext> &&decodedMess
 	}
 }
 
-void ServerLib::OnShowAvailableUsers(std::shared_ptr<MessageContext> &&decodedMessage, std::shared_ptr<Session> &&messageOwner)
+void ServerLib::OnShowAvailableUsers(std::shared_ptr<MessageContext> &&decodedMessage,
+									 std::shared_ptr<Session> &&messageOwner)
 {
 	std::string username = messageOwner->getSessionOwner();
 	std::string activeUsers{"Active users"};
 
-	for(const auto& session : getActiveSessions())
+	for(const auto &session : getActiveSessions())
 	{
-		if(session->getSessionOwner() == username) continue;
+		if(session->getSessionOwner() == username)
+			continue;
 
-		activeUsers+= ":" + session->getSessionOwner();
+		activeUsers += ":" + session->getSessionOwner();
 	}
 
 	if(!activeUsers.empty())
 		messageOwner->Send(ResponseCoder::makeCollable()(MessageType::PrintUsers, username, username, activeUsers));
 }
 
+// CODE UNDER WILL BE IN DIFFERENT FILE
 
 int main()
 {
