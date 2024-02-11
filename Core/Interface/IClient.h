@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../Common/TSqueue.h"
+
 template <class DataType>
 class IClient
 {
@@ -26,20 +28,22 @@ public:
 	 */
 	virtual const bool IsConnected() const = 0;
 
-protected:
-	/**
-	 * @returns true, if successfull run, false if not
-	 *
-	 * @note This function have to be called to run the client thread
-	 */
-	virtual const bool Run() = 0;
-
 	/**
 	 * @returns true, if successfull send message, false if not
 	 *
 	 * @note This function is called to send coded message
 	 */
 	virtual const bool Send(const DataType &) = 0;
+
+	virtual tsqueue<std::string> &GetIncomingMessages() = 0;
+
+private:
+	/**
+	 * @returns true, if successfull run, false if not
+	 *
+	 * @note This function have to be called to run the client thread
+	 */
+	virtual const bool Run() = 0;
 
 	/**
 	 * @returns std::string with coded message

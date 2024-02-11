@@ -1,4 +1,4 @@
-#include <ClientLib.h>
+#include <ClientFactory.cpp>
 
 int main()
 {
@@ -19,13 +19,15 @@ int main()
 	}
 	sqlite3_close(db);
 
-	std::shared_ptr<ClientLib> client = std::make_shared<ClientLib>();
-	client->Connect("127.0.0.1", "9000");
+	auto clientFactory = ClientFactory::invokeClientFactory();
+	auto client = clientFactory();
+
+	client->connect("127.0.0.1", "9000");
 
 	std::thread thread = std::thread(
 			[&]()
 			{
-				while(client->IsConnected())
+				while(client->isConnected())
 				{
 					auto msg = client->readMessage();
 					std::cout << "[" + msg.getSenderName() + "] " + msg.getBody() << std::endl;

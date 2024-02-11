@@ -1,58 +1,74 @@
 #include "ClientLib.h"
 
+ClientLib::ClientLib(std::shared_ptr<IClient<std::string>> client, ResponseDecoder::CallResponseDecoder responseDecoder,
+					 ResponseCoder::CallResponseCoder responseCoder)
+	: client_(std::move(client)), responseDecoder_(std::move(responseDecoder)), responseCoder_(std::move(responseCoder))
+{
+}
+
 bool ClientLib::login(const std::string &userName)
 {
-	std::string codedMessage = ResponseCoder::makeCollable()(MessageType::Establish, userName, "", "");
+	std::string codedMessage = responseCoder_(MessageType::Establish, userName, "", "");
 
-	Send(codedMessage);
+	client_->Send(codedMessage);
 
 	return true;
 }
 
 bool ClientLib::unlogin()
 {
-	std::string codedMessage = ResponseCoder::makeCollable()(MessageType::Relinquish, "", "", "");
+	std::string codedMessage = responseCoder_(MessageType::Relinquish, "", "", "");
 
-	Disconnect();
+	client_->Disconnect();
 
-	Send(codedMessage);
+	client_->Send(codedMessage);
 
 	return true;
 }
 
 bool ClientLib::printUsers()
 {
-	std::string codedMessage = ResponseCoder::makeCollable()(MessageType::PrintUsers, "", "", "");
+	std::string codedMessage = responseCoder_(MessageType::PrintUsers, "", "", "");
 
-	Send(codedMessage);
+	client_->Send(codedMessage);
 
 	return true;
 }
 
 bool ClientLib::sendMessage(const std::string &sender, const std::string &recipient, const std::string &message)
 {
-	std::string codedMessage = ResponseCoder::makeCollable()(MessageType::Message, sender, recipient, message);
+	std::string codedMessage = responseCoder_(MessageType::Message, sender, recipient, message);
 
-	Send(codedMessage);
+	client_->Send(codedMessage);
 
 	return true;
 }
 
 bool ClientLib::sendMessageToAll(const std::string &message)
 {
-	std::string codedMessage = ResponseCoder::makeCollable()(MessageType::MessageAll, "", "", message);
+	std::string codedMessage = responseCoder_(MessageType::MessageAll, "", "", message);
 
-	Send(codedMessage);
+	client_->Send(codedMessage);
 
 	return true;
 }
 
+bool ClientLib::connect(const std::string &host, const std::string &port) const
+{
+	return client_->Connect(host, port);
+}
+
+bool ClientLib::isConnected() const
+{
+	return client_->IsConnected();
+}
+
 MessageContext ClientLib::readMessage()
 {
-	GetIncomingMessages().wait();
+	client_->GetIncomingMessages().wait();
 
-	if(!GetIncomingMessages().empty())
+	if(!client_->GetIncomingMessages().empty())
 	{
-		return *ResponseDecoder::makeCollable()(GetIncomingMessages().pop_front()).get();
+		return *(responseDecoder_(client_->GetIncomingMessages().pop_front()));
 	}
 }
