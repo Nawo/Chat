@@ -2,7 +2,6 @@
 
 #define ASIO_STANDALONE
 
-#include "../Common/TSqueue.h"
 #include "../Interface/IClient.h"
 
 #include <asio.hpp>
@@ -108,7 +107,7 @@ protected:
 							   });
 	}
 
-	tsqueue<std::string> &GetIncomingMessages()
+	tsqueue<std::string> &GetIncomingMessages() override
 	{
 		return m_incomingMessages;
 	}

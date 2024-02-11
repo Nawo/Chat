@@ -13,6 +13,7 @@ include_directories(../lib/sqlite3)
 include_directories(../Common)
 include_directories(../Handlers)
 include_directories(../Core/Client)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 add_library(${PROJECT_NAME} STATIC ${SOURCES}) 
 
