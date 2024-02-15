@@ -9,8 +9,8 @@ class ClientFactory
 public:
 	using CallClientFactory = std::function<std::shared_ptr<IClientLib>()>;
 
-	static CallClientFactory invokeClientFactory(std::function<void(std::string)>);
+	static CallClientFactory invokeClientFactory();
 
 private:
-	std::shared_ptr<IClientLib> createClient(std::function<void(std::string)>);
+	std::shared_ptr<IClientLib> createClient();
 };

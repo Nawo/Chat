@@ -11,7 +11,7 @@
 class Client : public IClient<std::string>
 {
 public:
-	Client(std::function<void(std::string)> callback) : m_socket(m_context), m_callback(callback)
+	Client() : m_socket(m_context)
 	{
 	}
 	~Client()
@@ -36,6 +36,8 @@ public:
 		}
 		catch(std::exception &e)
 		{
+			std::cerr << "[ERROR] " << e.what() << std::endl;
+
 			return false;
 		}
 
@@ -73,6 +75,8 @@ protected:
 		}
 		catch(std::exception &e)
 		{
+			std::cerr << "[ERROR] " << e.what() << std::endl;
+
 			return false;
 		}
 
@@ -82,7 +86,6 @@ protected:
 	const bool Send(const std::string &msg) override
 	{
 		asio::write(m_socket, asio::buffer(msg + "\n"));
-		m_callback("elo");
 		return true;
 	}
 
@@ -99,7 +102,7 @@ protected:
 								   }
 								   else
 								   {
-									   // m_callback(errorCode);
+									   std::cerr << "[ERROR] " << errorCode.message() << std::endl;
 								   }
 							   });
 	}
@@ -110,7 +113,6 @@ protected:
 	}
 
 private:
-	std::function<void(std::string)> m_callback;
 	tsqueue<std::string> m_incomingMessages;
 	std::thread m_thread;
 	asio::io_context m_context;

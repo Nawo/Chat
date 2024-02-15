@@ -4,19 +4,19 @@
 #include "ResponseCoder.h"
 #include "ResponseDecoder.h"
 
-ClientFactory::CallClientFactory ClientFactory::invokeClientFactory(std::function<void(std::string)> callback = nullptr)
+ClientFactory::CallClientFactory ClientFactory::invokeClientFactory()
 {
 	return [&]()
 	{
 		auto clientFactory = ClientFactory();
-		return clientFactory.createClient(callback);
+		return clientFactory.createClient();
 	};
 }
 
-std::shared_ptr<IClientLib> ClientFactory::createClient(std::function<void(std::string)> callback)
+std::shared_ptr<IClientLib> ClientFactory::createClient()
 {
 	auto coder = ResponseCoder::makeCollable();
 	auto decoder = ResponseDecoder::makeCollable();
-	auto client = std::make_shared<Client>(callback);
+	auto client = std::make_shared<Client>();
 	return std::make_shared<ClientLib>(client, decoder, coder);
 }
