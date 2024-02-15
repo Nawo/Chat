@@ -1,5 +1,10 @@
 #include <ClientFactory.cpp>
 
+void printError(std::string e)
+{
+	std::cout << e << std::endl;
+}
+
 int main()
 {
 	sqlite3 *db;
@@ -19,7 +24,7 @@ int main()
 	}
 	sqlite3_close(db);
 
-	auto clientFactory = ClientFactory::invokeClientFactory();
+	auto clientFactory = ClientFactory::invokeClientFactory(printError);
 	auto client = clientFactory();
 
 	client->connect("127.0.0.1", "9000");

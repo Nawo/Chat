@@ -67,8 +67,5 @@ MessageContext ClientLib::readMessage()
 {
 	client_->GetIncomingMessages().wait();
 
-	if(!client_->GetIncomingMessages().empty())
-	{
-		return *(responseDecoder_(client_->GetIncomingMessages().pop_front()));
-	}
+	return *(responseDecoder_(client_->GetIncomingMessages().pop_front()));
 }

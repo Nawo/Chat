@@ -27,17 +27,23 @@ public:
 	T pop_front()
 	{
 		std::scoped_lock lock(m_mutex);
-		auto t = std::move(m_deque.front());
-		m_deque.pop_front();
-		return t;
+		if(!m_deque.empty())
+		{
+			auto t = std::move(m_deque.front());
+			m_deque.pop_front();
+			return t;
+		}
 	}
 
 	T pop_back()
 	{
 		std::scoped_lock lock(m_mutex);
-		auto t = std::move(m_deque.back());
-		m_deque.pop_back();
-		return t;
+		if(!m_deque.empty())
+		{
+			auto t = std::move(m_deque.back());
+			m_deque.pop_back();
+			return t;
+		}
 	}
 
 	void push_back(const T &item)
