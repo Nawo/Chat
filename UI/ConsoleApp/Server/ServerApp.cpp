@@ -1,8 +1,10 @@
-#include <ServerLib.h>
+#include <ServerFactory.cpp>
 
 int main()
 {
-	std::shared_ptr<ServerLib> server = std::make_shared<ServerLib>(9000);
+	auto serverInvoke = ServerFactory::invokeServerFactory();
+	auto server = serverInvoke(9000);
+
 	server->Start();
 	std::cout << "[SERVER] started" << std::endl;
 	while(true)

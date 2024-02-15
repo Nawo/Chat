@@ -1,14 +1,20 @@
 #include "ServerLib.h"
 
+ServerLib::ServerLib(std::shared_ptr<IServer> server, ResponseDecoder::CallResponseDecoder responseDecoder,
+					 ResponseCoder::CallResponseCoder responseCoder)
+	: server_(std::move(server)), responseDecoder_(std::move(responseDecoder)), responseCoder_(std::move(responseCoder))
+{
+}
+
 void ServerLib::Update()
 {
-	GetIncomingMessages().wait();
+	server_->GetIncomingMessages().wait();
 
-	if(!GetIncomingMessages().empty())
+	if(!server_->GetIncomingMessages().empty())
 	{
-		auto incomingMessage = GetIncomingMessages().pop_front();
+		auto incomingMessage = server_->GetIncomingMessages().pop_front();
 
-		std::shared_ptr<MessageContext> decodedMessage = ResponseDecoder::makeCollable()(incomingMessage.first);
+		auto decodedMessage = responseDecoder_(incomingMessage.first);
 
 		const MessageType &msgType = decodedMessage->getMessageType();
 
@@ -55,8 +61,8 @@ void ServerLib::OnClientLogin(std::shared_ptr<MessageContext> &&decodedMessage, 
 	std::cout << username + " join the chat \n";
 	std::cout << "IP: " + messageOwner->getSessionIP() + "\n";
 
-	messageOwner->Send(ResponseCoder::makeCollable()(MessageType::Message, "SERVER", username,
-													 PredefinedMessages::successClientLogin));
+	messageOwner->Send(
+			responseCoder_(MessageType::Message, "SERVER", username, PredefinedMessages::successClientLogin));
 }
 
 void ServerLib::OnClientUnlogin(std::shared_ptr<MessageContext> &&decodedMessage,
@@ -66,8 +72,8 @@ void ServerLib::OnClientUnlogin(std::shared_ptr<MessageContext> &&decodedMessage
 
 	std::cout << username + " left the chat." + "\n";
 
-	messageOwner->Send(ResponseCoder::makeCollable()(MessageType::Message, "SERVER", username,
-													 PredefinedMessages::successClientDisconnect));
+	messageOwner->Send(
+			responseCoder_(MessageType::Message, "SERVER", username, PredefinedMessages::successClientDisconnect));
 }
 
 void ServerLib::OnClientMessage(std::shared_ptr<MessageContext> &&decodedMessage,
@@ -75,14 +81,14 @@ void ServerLib::OnClientMessage(std::shared_ptr<MessageContext> &&decodedMessage
 {
 	std::string username = messageOwner->getSessionOwner();
 
-	std::shared_ptr<Session> recipientSession = getSessionByUsername(decodedMessage->getReceiverName());
+	std::shared_ptr<Session> recipientSession = server_->getSessionByUsername(decodedMessage->getReceiverName());
 	if(recipientSession != nullptr)
 	{
 		std::cout << username + " sent message to " + decodedMessage->getReceiverName() + "\n";
 		std::cout << "Message: " + decodedMessage->getBody() + "\n";
 
-		recipientSession->Send(ResponseCoder::makeCollable()(
-				MessageType::Message, username, decodedMessage->getReceiverName(), decodedMessage->getBody()));
+		recipientSession->Send(responseCoder_(MessageType::Message, username, decodedMessage->getReceiverName(),
+											  decodedMessage->getBody()));
 	}
 
 	else // user not found in active sessions
@@ -93,9 +99,7 @@ void ServerLib::OnClientMessage(std::shared_ptr<MessageContext> &&decodedMessage
 
 		std::string errorMsg = decodedMessage->getReceiverName() + " is OFFLINE";
 
-		std::string codedMessage = ResponseCoder::makeCollable()(MessageType::Error, "SERVER", username, errorMsg);
-
-		messageOwner->Send(codedMessage);
+		messageOwner->Send(responseCoder_(MessageType::Error, "SERVER", username, errorMsg));
 	}
 }
 
@@ -104,15 +108,14 @@ void ServerLib::OnClientMessageAll(std::shared_ptr<MessageContext> &&decodedMess
 {
 	std::string username = messageOwner->getSessionOwner();
 
-	for(const auto &session : getActiveSessions())
+	for(const auto &session : server_->getActiveSessions())
 	{
 		if(session->getSessionOwner() != username)
 		{
 			std::cout << username + " sent message to all\n";
 			std::cout << "Message: " + decodedMessage->getBody() + "\n";
 
-			session->Send(
-					ResponseCoder::makeCollable()(MessageType::Message, username, "all", decodedMessage->getBody()));
+			session->Send(responseCoder_(MessageType::Message, username, "all", decodedMessage->getBody()));
 		}
 	}
 }
@@ -123,7 +126,7 @@ void ServerLib::OnShowAvailableUsers(std::shared_ptr<MessageContext> &&decodedMe
 	std::string username = messageOwner->getSessionOwner();
 	std::string activeUsers{"Active users"};
 
-	for(const auto &session : getActiveSessions())
+	for(const auto &session : server_->getActiveSessions())
 	{
 		if(session->getSessionOwner() == username)
 			continue;
@@ -132,5 +135,10 @@ void ServerLib::OnShowAvailableUsers(std::shared_ptr<MessageContext> &&decodedMe
 	}
 
 	if(!activeUsers.empty())
-		messageOwner->Send(ResponseCoder::makeCollable()(MessageType::PrintUsers, "SERVER", username, activeUsers));
+		messageOwner->Send(responseCoder_(MessageType::PrintUsers, "SERVER", username, activeUsers));
+}
+
+const bool ServerLib::Start() const
+{
+	return server_->Start();
 }
