@@ -14,6 +14,7 @@ include_directories(../../../lib/sqlite3)
 include_directories(../../../Common)
 include_directories(../../../Handlers)
 include_directories(../../../Core/Server)
+include_directories(../../../Factories)
 
 add_executable(${PROJECT_NAME} ${SOURCES}) 
 

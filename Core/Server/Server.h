@@ -43,7 +43,7 @@ public:
 	}
 
 protected:
-	const std::shared_ptr<Session> &getSessionByUsername(const std::string &username)
+	const std::shared_ptr<Session> &getSessionByUsername(const std::string &username) override
 	{
 		std::lock_guard<std::mutex> lg(m_mutex);
 		auto it = std::find_if(m_activeSessions.begin(), m_activeSessions.end(),
@@ -56,12 +56,12 @@ protected:
 		return *it;
 	}
 
-	const std::vector<std::shared_ptr<Session>> &getActiveSessions() const
+	const std::vector<std::shared_ptr<Session>> &getActiveSessions() const override
 	{
 		return m_activeSessions;
 	}
 
-	tsqueue<std::pair<std::string, std::shared_ptr<Session>>> &GetIncomingMessages()
+	tsqueue<std::pair<std::string, std::shared_ptr<Session>>> &GetIncomingMessages() override
 	{
 		return m_incomingMessages;
 	}
